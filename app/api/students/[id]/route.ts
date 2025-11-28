@@ -1,97 +1,55 @@
 import { prisma } from "@/lib/db"
-import { Prisma } from "@prisma/client";
-import { type NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server"
 
-export async function GET(
-  request: NextRequest,
-  context: { params: Promise<{ id: string }> }
-) {
+export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const { id } = await context.params;
     const student = await prisma.student.findUnique({
-      where: { id },
-    });
+      where: { id: params.id },
+    })
 
     if (!student) {
-      return NextResponse.json(
-        { message: "Estudante não encontrado" },
-        { status: 404 }
-      );
+      return NextResponse.json({ message: "Estudante não encontrado" }, { status: 404 })
     }
 
-    return NextResponse.json(student);
+    return NextResponse.json(student)
   } catch (error) {
-    console.error("Error fetching student:", error);
-    return NextResponse.json(
-      { message: "Erro ao buscar estudante" },
-      { status: 500 }
-    );
+    console.error("Error fetching student:", error)
+    return NextResponse.json({ message: "Erro ao buscar estudante" }, { status: 500 })
   }
 }
 
-export async function PUT(  
-  request: NextRequest,
-  context: { params: Promise<{ id: string }> }
-) {
+export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const body = await request.json();
+    const body = await request.json()
 
-    const data: Record<string, unknown> = {};
-    if (body.fullName !== undefined) data.fullName = body.fullName;
-    if (body.email !== undefined) data.email = body.email;
-    if (body.phone !== undefined) data.phone = body.phone;
-    if (body.address !== undefined) data.address = body.address;
-    if (body.instruments !== undefined) data.instruments = body.instruments;
-    if (body.available !== undefined) data.available = body.available;
-
-    if (Object.keys(data).length === 0) {
-      return NextResponse.json(
-        { message: "Nenhum campo para atualizar" },
-        { status: 400 }
-      );
-    }
-
-    const { id } = await context.params;
     const student = await prisma.student.update({
-      where: { id },
-      data,
-    });
+      where: { id: params.id },
+      data: {
+        fullName: body.fullName,
+        email: body.email,
+        phone: body.phone,
+        address: body.address,
+        instruments: body.instruments,
+        available: body.available,
+      },
+    })
 
-    return NextResponse.json(student);
+    return NextResponse.json(student)
   } catch (error) {
-    console.error("Error updating student:", error);
-    return NextResponse.json(
-      { message: "Erro ao atualizar estudante" },
-      { status: 500 }
-    );
+    console.error("Error updating student:", error)
+    return NextResponse.json({ message: "Erro ao atualizar estudante" }, { status: 500 })
   }
 }
 
-export async function DELETE(
-  request: NextRequest,
-  context: { params: Promise<{ id: string }> }
-) {
+export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   try {
-    const { id } = await context.params;
     const student = await prisma.student.delete({
-      where: { id },
-    });
+      where: { id: params.id },
+    })
 
-    return NextResponse.json({ message: "Estudante deletado com sucesso" });
+    return NextResponse.json({ message: "Estudante deletado com sucesso" })
   } catch (error) {
-    if (
-      error instanceof Prisma.PrismaClientKnownRequestError &&
-      error.code === "P2025"
-    ) {
-      return NextResponse.json(
-        { message: "Estudante não encontrado" },
-        { status: 404 }
-      );
-    }
-    console.error("Error deleting student:", error);
-    return NextResponse.json(
-      { message: "Erro ao deletar estudante" },
-      { status: 500 }
-    );
+    console.error("Error deleting student:", error)
+    return NextResponse.json({ message: "Erro ao deletar estudante" }, { status: 500 })
   }
 }

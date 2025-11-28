@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
     })
   } catch (error) {
     console.error("Error fetching students:", error)
-    return NextResponse.json({ students: [], totalPages: 0, currentPage: 1 })
+    return NextResponse.json({ message: "Erro ao buscar estudantes" }, { status: 500 })
   }
 }
 

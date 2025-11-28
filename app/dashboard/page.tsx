@@ -8,63 +8,68 @@ import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Users, MoreHorizontal, Eye, Edit2, Trash2, Search } from "lucide-react"
-import { toast } from "sonner"
-import { StudentDialog } from "@/components/student-dialog"
+import Image from "next/image";
+import { toast } from "sonner";
+import { StudentDialog } from "@/components/student-dialog";
 
 interface Student {
-  id: string
-  fullName: string
-  email: string
-  phone: string
-  address: string
-  instruments: string[]
-  available: boolean
-  createdAt: string
+  id: string;
+  fullName: string;
+  email: string;
+  phone: string;
+  address: string;
+  instruments: string[];
+  available: boolean;
+  createdAt: string;
 }
 
 export default function DashboardPage() {
-  const [students, setStudents] = useState<Student[]>([])
-  const [loading, setLoading] = useState(false)
-  const [searchQuery, setSearchQuery] = useState("")
-  const [currentPage, setCurrentPage] = useState(1)
-  const [totalPages, setTotalPages] = useState(1)
-  const [selectedStudent, setSelectedStudent] = useState<Student | null>(null)
-  const [dialogOpen, setDialogOpen] = useState(false)
-  const [dialogMode, setDialogMode] = useState<"view" | "edit">("view")
+  const [students, setStudents] = useState<Student[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogMode, setDialogMode] = useState<"view" | "edit">("view");
 
-  const itemsPerPage = 10
+  const itemsPerPage = 10;
 
   useEffect(() => {
-    fetchStudents()
-  }, [currentPage, searchQuery])
+    fetchStudents();
+  }, [currentPage, searchQuery]);
 
   const fetchStudents = async () => {
-    setLoading(true)
+    setLoading(true);
     try {
-      const response = await fetch(`/api/students?page=${currentPage}&search=${encodeURIComponent(searchQuery)}`)
-      if (!response.ok) throw new Error("Failed to fetch students")
+      const response = await fetch(
+        `/api/students?page=${currentPage}&search=${encodeURIComponent(
+          searchQuery
+        )}`
+      );
+      if (!response.ok) throw new Error("Failed to fetch students");
 
-      const data = await response.json()
-      setStudents(data.students)
-      setTotalPages(data.totalPages)
+      const data = await response.json();
+      setStudents(data.students);
+      setTotalPages(data.totalPages);
     } catch (error) {
-      toast.error("Erro ao carregar estudantes")
+      toast.error("Erro ao carregar estudantes");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleViewStudent = (student: Student) => {
-    setSelectedStudent(student)
-    setDialogMode("view")
-    setDialogOpen(true)
-  }
+    setSelectedStudent(student);
+    setDialogMode("view");
+    setDialogOpen(true);
+  };
 
   const handleEditStudent = (student: Student) => {
-    setSelectedStudent(student)
-    setDialogMode("edit")
-    setDialogOpen(true)
-  }
+    setSelectedStudent(student);
+    setDialogMode("edit");
+    setDialogOpen(true);
+  };
 
   const handleDeleteStudent = async (id: string) => {
     if (!confirm("Tem certeza que deseja deletar este estudante?")) return;
@@ -108,11 +113,24 @@ export default function DashboardPage() {
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <div className="flex items-center mb-2">
-            <Users className="h-8 w-8 text-blue-400 mr-3" />
-            <h1 className="text-3xl font-bold text-white">Painel Administrativo</h1>
+          <div className="flex flex-col items-center mb-2">
+            <Image
+              src="/Logo.jpg"
+              alt="Logo"
+              width={200}
+              height={100}
+              className="rounded mr-3 mb-10"
+            />
+            <div className="flex items-center">
+              <Users className="h-8 w-8 text-blue-400 mr-3" />
+              <h1 className="text-3xl font-bold text-white">
+                Painel Administrativo
+              </h1>
+            </div>
           </div>
-          <p className="text-slate-400">Gerencie todos os estudantes registrados</p>
+          <p className="text-slate-400 text-center">
+            Gerencie todos os estudantes registrados
+          </p>
         </div>
 
         {/* Search and Controls */}
@@ -124,13 +142,16 @@ export default function DashboardPage() {
                 placeholder="Buscar por ID do estudante..."
                 value={searchQuery}
                 onChange={(e) => {
-                  setSearchQuery(e.target.value)
-                  setCurrentPage(1)
+                  setSearchQuery(e.target.value);
+                  setCurrentPage(1);
                 }}
                 className="pl-10 bg-slate-700 border-slate-600 text-white placeholder:text-slate-500"
               />
             </div>
-            <Button onClick={() => fetchStudents()} className="bg-blue-600 hover:bg-blue-700 text-white">
+            <Button
+              onClick={() => fetchStudents()}
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+            >
               Atualizar
             </Button>
           </div>
@@ -142,39 +163,74 @@ export default function DashboardPage() {
             <Table>
               <TableHeader className="bg-slate-700">
                 <TableRow className="border-slate-600 hover:bg-slate-700">
-                  <TableHead className="text-slate-300 font-semibold">ID</TableHead>
-                  <TableHead className="text-slate-300 font-semibold">Nome</TableHead>
-                  <TableHead className="text-slate-300 font-semibold">Email</TableHead>
-                  <TableHead className="text-slate-300 font-semibold">WhatsApp</TableHead>
-                  <TableHead className="text-slate-300 font-semibold">Instrumentos</TableHead>
-                  <TableHead className="text-slate-300 font-semibold">Disponível</TableHead>
-                  <TableHead className="text-slate-300 font-semibold text-right">Ações</TableHead>
+                  <TableHead className="text-slate-300 font-semibold">
+                    ID
+                  </TableHead>
+                  <TableHead className="text-slate-300 font-semibold">
+                    Nome
+                  </TableHead>
+                  <TableHead className="text-slate-300 font-semibold">
+                    Email
+                  </TableHead>
+                  <TableHead className="text-slate-300 font-semibold">
+                    WhatsApp
+                  </TableHead>
+                  <TableHead className="text-slate-300 font-semibold">
+                    Instrumentos
+                  </TableHead>
+                  <TableHead className="text-slate-300 font-semibold">
+                    Disponível
+                  </TableHead>
+                  <TableHead className="text-slate-300 font-semibold text-right">
+                    Ações
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {loading ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center py-8 text-slate-400">
+                    <TableCell
+                      colSpan={7}
+                      className="text-center py-8 text-slate-400"
+                    >
                       Carregando...
                     </TableCell>
                   </TableRow>
                 ) : students.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center py-8 text-slate-400">
+                    <TableCell
+                      colSpan={7}
+                      className="text-center py-8 text-slate-400"
+                    >
                       Nenhum estudante encontrado
                     </TableCell>
                   </TableRow>
                 ) : (
                   students.map((student) => (
-                    <TableRow key={student.id} className="border-slate-700 hover:bg-slate-700 transition">
-                      <TableCell className="text-slate-300 font-mono text-sm">{student.id.slice(0, 8)}...</TableCell>
-                      <TableCell className="text-white font-medium">{student.fullName}</TableCell>
-                      <TableCell className="text-slate-300">{student.email}</TableCell>
-                      <TableCell className="text-slate-300">{student.phone}</TableCell>
+                    <TableRow
+                      key={student.id}
+                      className="border-slate-700 hover:bg-slate-700 transition"
+                    >
+                      <TableCell className="text-slate-300 font-mono text-sm">
+                        {student.id.slice(0, 8)}...
+                      </TableCell>
+                      <TableCell className="text-white font-medium">
+                        {student.fullName}
+                      </TableCell>
+                      <TableCell className="text-slate-300">
+                        {student.email}
+                      </TableCell>
+                      <TableCell className="text-slate-300">
+                        {student.phone}
+                      </TableCell>
                       <TableCell>
                         <div className="flex gap-1 flex-wrap">
                           {student.instruments.map((instrument) => (
-                            <Badge key={instrument} variant="secondary" className="bg-blue-600 text-white">
+                            <Badge
+                              key={instrument}
+                              variant="secondary"
+                              className="bg-blue-600 text-white"
+                            >
                               {instrument}
                             </Badge>
                           ))}
@@ -182,7 +238,11 @@ export default function DashboardPage() {
                       </TableCell>
                       <TableCell>
                         <Badge
-                          className={student.available ? "bg-green-600 text-white" : "bg-slate-600 text-slate-300"}
+                          className={
+                            student.available
+                              ? "bg-green-600 text-white"
+                              : "bg-slate-600 text-slate-300"
+                          }
                         >
                           {student.available ? "Sim" : "Não"}
                         </Badge>
@@ -190,11 +250,18 @@ export default function DashboardPage() {
                       <TableCell className="text-right">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm" className="text-slate-300 hover:text-white">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="text-slate-300 hover:text-white"
+                            >
                               <MoreHorizontal className="h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="bg-slate-700 border-slate-600">
+                          <DropdownMenuContent
+                            align="end"
+                            className="bg-slate-700 border-slate-600"
+                          >
                             <DropdownMenuItem
                               onClick={() => handleViewStudent(student)}
                               className="text-slate-200 cursor-pointer hover:bg-slate-600"
@@ -264,5 +331,5 @@ export default function DashboardPage() {
         onSave={handleSaveStudent}
       />
     </div>
-  )
+  );
 }

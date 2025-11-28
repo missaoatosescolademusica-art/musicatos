@@ -12,12 +12,13 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { MultiSelect } from "@/components/multi-select"
 import { toast } from "sonner"
 import { Music } from "lucide-react"
+import Image from "next/image";
 
-const INSTRUMENTS = ["Violão", "Canto", "Teclado", "Bateria"]
+const INSTRUMENTS = ["Violão", "Canto", "Teclado", "Bateria"];
 
 export default function RegisterPage() {
-  const router = useRouter()
-  const [loading, setLoading] = useState(false)
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -25,63 +26,73 @@ export default function RegisterPage() {
     address: "",
     instruments: [] as string[],
     available: true,
-  })
+  });
 
   const formatPhone = (value: string) => {
-    const cleaned = value.replace(/\D/g, "")
+    const cleaned = value.replace(/\D/g, "");
     if (cleaned.length <= 2) {
-      return cleaned
+      return cleaned;
     }
 
     if (cleaned.length <= 7) {
-      return `(${cleaned.slice(0, 2)}) ${cleaned.slice(2)}`
+      return `(${cleaned.slice(0, 2)}) ${cleaned.slice(2)}`;
     }
 
     if (cleaned.length <= 12) {
-      return `(${cleaned.slice(0, 2)}) ${cleaned.slice(2, 7)} - ${cleaned.slice(7)}`
+      return `(${cleaned.slice(0, 2)}) ${cleaned.slice(2, 7)} - ${cleaned.slice(
+        7
+      )}`;
     }
 
-    return `(${cleaned.slice(0, 2)}) ${cleaned.slice(2, 7)} - ${cleaned.slice(7, 12)}`
-  }
+    return `(${cleaned.slice(0, 2)}) ${cleaned.slice(2, 7)} - ${cleaned.slice(
+      7,
+      12
+    )}`;
+  };
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const formatted = formatPhone(e.target.value)
-    setFormData({ ...formData, phone: formatted })
-  }
+    const formatted = formatPhone(e.target.value);
+    setFormData({ ...formData, phone: formatted });
+  };
 
   const handleInstrumentsChange = (selected: string[]) => {
-    setFormData({ ...formData, instruments: selected })
-  }
+    setFormData({ ...formData, instruments: selected });
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
-    if (!formData.fullName || !formData.email || !formData.phone || !formData.address) {
-      toast.error("Por favor, preencha todos os campos obrigatórios")
-      return
+    if (
+      !formData.fullName ||
+      !formData.email ||
+      !formData.phone ||
+      !formData.address
+    ) {
+      toast.error("Por favor, preencha todos os campos obrigatórios");
+      return;
     }
 
     if (formData.instruments.length === 0) {
-      toast.error("Selecione pelo menos um instrumento")
-      return
+      toast.error("Selecione pelo menos um instrumento");
+      return;
     }
 
-    setLoading(true)
+    setLoading(true);
     try {
-      console.log(formData)
+      console.log(formData);
       const response = await fetch("/api/students", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
-      })
+      });
 
       if (!response.ok) {
-        console.log(response)
-        const error = await response.json()
-        throw new Error(error.message || "Erro ao registrar estudante")
+        console.log(response);
+        const error = await response.json();
+        throw new Error(error.message || "Erro ao registrar estudante");
       }
 
-      toast.success("Estudante registrado com sucesso!")
+      toast.success("Estudante registrado com sucesso!");
       setFormData({
         fullName: "",
         email: "",
@@ -89,26 +100,39 @@ export default function RegisterPage() {
         address: "",
         instruments: [],
         available: true,
-      })
+      });
       // router.push('/dashboard')
     } catch (error) {
-      console.log(error)
-      toast.error(error instanceof Error ? error.message : "Erro ao registrar")
+      console.log(error);
+      toast.error(error instanceof Error ? error.message : "Erro ao registrar");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-2xl mx-auto">
         {/* Header */}
         <div className="text-center mb-12">
-          <div className="flex items-center justify-center mb-4">
-            <Music className="h-10 w-10 text-blue-400 mr-3" />
-            <h1 className="text-4xl font-bold text-white">Registro de Estudante</h1>
+          <div className="flex flex-col items-center justify-center mb-4">
+            <Image
+              src="/Logo.jpg"
+              alt="Logo"
+              width={100}
+              height={100}
+              className="rounded w-1/2 mr-3 mb-10"
+            />
+            <div className="flex items-center">
+              <Music className="h-10 w-10 text-blue-400 mr-3" />
+              <h1 className="text-4xl font-bold text-white">
+                Registro de Estudante
+              </h1>
+            </div>
           </div>
-          <p className="text-slate-400 text-lg">Preencha o formulário abaixo para registrar um novo estudante</p>
+          <p className="text-slate-400 text-lg">
+            Preencha o formulário abaixo para registrar um novo estudante
+          </p>
         </div>
 
         {/* Form Card */}
@@ -116,21 +140,29 @@ export default function RegisterPage() {
           <form onSubmit={handleSubmit} className="p-8 space-y-6">
             {/* Full Name */}
             <div>
-              <Label htmlFor="fullName" className="text-slate-200 text-sm font-medium">
+              <Label
+                htmlFor="fullName"
+                className="text-slate-200 text-sm font-medium"
+              >
                 Nome Completo
               </Label>
               <Input
                 id="fullName"
                 placeholder="João Silva"
                 value={formData.fullName}
-                onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, fullName: e.target.value })
+                }
                 className="mt-2 bg-slate-700 border-slate-600 text-white placeholder:text-slate-500 focus:border-blue-400"
               />
             </div>
 
             {/* Email */}
             <div>
-              <Label htmlFor="email" className="text-slate-200 text-sm font-medium">
+              <Label
+                htmlFor="email"
+                className="text-slate-200 text-sm font-medium"
+              >
                 Email
               </Label>
               <Input
@@ -138,14 +170,19 @@ export default function RegisterPage() {
                 type="email"
                 placeholder="joao@email.com"
                 value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, email: e.target.value })
+                }
                 className="mt-2 bg-slate-700 border-slate-600 text-white placeholder:text-slate-500 focus:border-blue-400"
               />
             </div>
 
             {/* Phone */}
             <div>
-              <Label htmlFor="phone" className="text-slate-200 text-sm font-medium">
+              <Label
+                htmlFor="phone"
+                className="text-slate-200 text-sm font-medium"
+              >
                 WhatsApp
               </Label>
               <Input
@@ -160,22 +197,33 @@ export default function RegisterPage() {
 
             {/* Address */}
             <div>
-              <Label htmlFor="address" className="text-slate-200 text-sm font-medium">
+              <Label
+                htmlFor="address"
+                className="text-slate-200 text-sm font-medium"
+              >
                 Endereço
               </Label>
               <Input
                 id="address"
                 placeholder="Rua Principal, 123"
                 value={formData.address}
-                onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, address: e.target.value })
+                }
                 className="mt-2 bg-slate-700 border-slate-600 text-white placeholder:text-slate-500 focus:border-blue-400"
               />
             </div>
 
             {/* Instruments */}
             <div>
-              <Label className="text-slate-200 text-sm font-medium">Instrumentos</Label>
-              <MultiSelect options={INSTRUMENTS} selected={formData.instruments} onChange={handleInstrumentsChange} />
+              <Label className="text-slate-200 text-sm font-medium">
+                Instrumentos
+              </Label>
+              <MultiSelect
+                options={INSTRUMENTS}
+                selected={formData.instruments}
+                onChange={handleInstrumentsChange}
+              />
             </div>
 
             {/* Availability */}
@@ -183,10 +231,15 @@ export default function RegisterPage() {
               <Checkbox
                 id="available"
                 checked={formData.available}
-                onCheckedChange={(checked) => setFormData({ ...formData, available: checked as boolean })}
+                onCheckedChange={(checked) =>
+                  setFormData({ ...formData, available: checked as boolean })
+                }
                 className="border-slate-600 bg-slate-700"
               />
-              <Label htmlFor="available" className="text-slate-300 font-normal cursor-pointer">
+              <Label
+                htmlFor="available"
+                className="text-slate-300 font-normal cursor-pointer"
+              >
                 Disponível para aulas
               </Label>
             </div>
@@ -208,5 +261,5 @@ export default function RegisterPage() {
         </p>
       </div>
     </div>
-  )
+  );
 }

@@ -67,38 +67,41 @@ export default function DashboardPage() {
   }
 
   const handleDeleteStudent = async (id: string) => {
-    if (!confirm("Tem certeza que deseja deletar este estudante?")) return
+    if (!confirm("Tem certeza que deseja deletar este estudante?")) return;
 
     try {
-      const response = await fetch(`/api/students/${id}`, { method: "DELETE" })
-      if (!response.ok) throw new Error("Failed to delete")
+      const response = await fetch(`/api/students/${id}`, { method: "DELETE" });
+      console.log(response);
+      if (!response.ok) throw new Error("Failed to delete");
 
-      toast.success("Estudante deletado com sucesso")
-      fetchStudents()
+      toast.success("Estudante deletado com sucesso");
+      fetchStudents();
     } catch (error) {
-      toast.error("Erro ao deletar estudante")
+      console.log(error);
+      toast.error("Erro ao deletar estudante");
     }
-  }
+  };
 
   const handleSaveStudent = async (data: Omit<Student, "id" | "createdAt">) => {
-    if (!selectedStudent) return
+    if (!selectedStudent) return;
 
     try {
       const response = await fetch(`/api/students/${selectedStudent.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
-      })
+      });
 
-      if (!response.ok) throw new Error("Failed to update")
+      if (!response.ok) throw new Error("Failed to update");
 
-      toast.success("Estudante atualizado com sucesso")
-      setDialogOpen(false)
-      fetchStudents()
+      toast.success("Estudante atualizado com sucesso");
+      setDialogOpen(false);
+      fetchStudents();
     } catch (error) {
-      toast.error("Erro ao atualizar estudante")
+      console.log(error);
+      toast.error("Erro ao atualizar estudante");
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-6">

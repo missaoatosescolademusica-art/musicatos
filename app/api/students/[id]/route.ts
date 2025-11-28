@@ -1,55 +1,114 @@
 import { prisma } from "@/lib/db"
-import { type NextRequest, NextResponse } from "next/server"
+import { Prisma } from "@prisma/client";
+import { type NextRequest, NextResponse } from "next/server";
 
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(request: NextRequest, context: { params: any }) {
   try {
+    const p = context.params;
+    const { id } = typeof p?.then === "function" ? await p : p;
+    if (!id)
+      return NextResponse.json({ message: "ID inválido" }, { status: 400 });
+
     const student = await prisma.student.findUnique({
-      where: { id: params.id },
-    })
+      where: { id },
+    });
 
     if (!student) {
-      return NextResponse.json({ message: "Estudante não encontrado" }, { status: 404 })
+      return NextResponse.json(
+        { message: "Estudante não encontrado" },
+        { status: 404 }
+      );
     }
 
-    return NextResponse.json(student)
+    return NextResponse.json(student);
   } catch (error) {
-    console.error("Error fetching student:", error)
-    return NextResponse.json({ message: "Erro ao buscar estudante" }, { status: 500 })
+    console.error("Error fetching student:", error);
+    return NextResponse.json(
+      { message: "Erro ao buscar estudante" },
+      { status: 500 }
+    );
   }
 }
 
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(request: NextRequest, context: { params: any }) {
   try {
-    const body = await request.json()
+    const body = await request.json();
+
+    const p = context.params;
+    const { id } = typeof p?.then === "function" ? await p : p;
+    if (!id)
+      return NextResponse.json({ message: "ID inválido" }, { status: 400 });
+
+    const data: Record<string, unknown> = {};
+    if (body.fullName !== undefined) data.fullName = body.fullName;
+    if (body.email !== undefined) data.email = body.email;
+    if (body.phone !== undefined) data.phone = body.phone;
+    if (body.address !== undefined) data.address = body.address;
+    if (body.instruments !== undefined) data.instruments = body.instruments;
+    if (body.available !== undefined) data.available = body.available;
+
+    if (Object.keys(data).length === 0) {
+      return NextResponse.json(
+        { message: "Nenhum campo para atualizar" },
+        { status: 400 }
+      );
+    }
 
     const student = await prisma.student.update({
-      where: { id: params.id },
-      data: {
-        fullName: body.fullName,
-        email: body.email,
-        phone: body.phone,
-        address: body.address,
-        instruments: body.instruments,
-        available: body.available,
-      },
-    })
+      where: { id },
+      data,
+    });
 
-    return NextResponse.json(student)
+    return NextResponse.json(student);
   } catch (error) {
-    console.error("Error updating student:", error)
-    return NextResponse.json({ message: "Erro ao atualizar estudante" }, { status: 500 })
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      if (error.code === "P2025") {
+        return NextResponse.json(
+          { message: "Estudante não encontrado" },
+          { status: 404 }
+        );
+      }
+      if (error.code === "P2002") {
+        return NextResponse.json(
+          { message: "Email já registrado" },
+          { status: 409 }
+        );
+      }
+    }
+    console.error("Error updating student:", error);
+    return NextResponse.json(
+      { message: "Erro ao atualizar estudante" },
+      { status: 500 }
+    );
   }
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(request: NextRequest, context: { params: any }) {
   try {
-    const student = await prisma.student.delete({
-      where: { id: params.id },
-    })
+    const p = context.params;
+    const { id } = typeof p?.then === "function" ? await p : p;
+    if (!id)
+      return NextResponse.json({ message: "ID inválido" }, { status: 400 });
 
-    return NextResponse.json({ message: "Estudante deletado com sucesso" })
+    const student = await prisma.student.delete({
+      where: { id },
+    });
+
+    return NextResponse.json({ message: "Estudante deletado com sucesso" });
   } catch (error) {
-    console.error("Error deleting student:", error)
-    return NextResponse.json({ message: "Erro ao deletar estudante" }, { status: 500 })
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2025"
+    ) {
+      return NextResponse.json(
+        { message: "Estudante não encontrado" },
+        { status: 404 }
+      );
+    }
+    console.error("Error deleting student:", error);
+    return NextResponse.json(
+      { message: "Erro ao deletar estudante" },
+      { status: 500 }
+    );
   }
 }

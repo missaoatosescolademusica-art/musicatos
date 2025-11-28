@@ -1,24 +1,37 @@
 import { prisma } from "@/lib/db"
-import { type NextRequest, NextResponse } from "next/server"
+import { Prisma } from "@prisma/client";
+import { type NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
   try {
-    const searchParams = request.nextUrl.searchParams
-    const page = Number.parseInt(searchParams.get("page") || "1")
-    const search = searchParams.get("search") || ""
-    const itemsPerPage = 10
+    const searchParams = request.nextUrl.searchParams;
+    const page = Number.parseInt(searchParams.get("page") || "1");
+    const search = searchParams.get("search") || "";
+    const itemsPerPage = 10;
 
-    const skip = (page - 1) * itemsPerPage
+    const skip = (page - 1) * itemsPerPage;
 
-    const where = search
+    const where: Prisma.StudentWhereInput = search
       ? {
           OR: [
-            { id: { contains: search, mode: "insensitive" } },
-            { fullName: { contains: search, mode: "insensitive" } },
-            { email: { contains: search, mode: "insensitive" } },
+            {
+              id: { contains: search, mode: "insensitive" as Prisma.QueryMode },
+            },
+            {
+              fullName: {
+                contains: search,
+                mode: "insensitive" as Prisma.QueryMode,
+              },
+            },
+            {
+              email: {
+                contains: search,
+                mode: "insensitive" as Prisma.QueryMode,
+              },
+            },
           ],
         }
-      : {}
+      : {};
 
     const [students, total] = await Promise.all([
       prisma.student.findMany({
@@ -28,18 +41,21 @@ export async function GET(request: NextRequest) {
         orderBy: { createdAt: "desc" },
       }),
       prisma.student.count({ where }),
-    ])
+    ]);
 
-    const totalPages = Math.ceil(total / itemsPerPage)
+    const totalPages = Math.ceil(total / itemsPerPage);
 
     return NextResponse.json({
       students,
       totalPages,
       currentPage: page,
-    })
+    });
   } catch (error) {
-    console.error("Error fetching students:", error)
-    return NextResponse.json({ message: "Erro ao buscar estudantes" }, { status: 500 })
+    console.error("Error fetching students:", error);
+    return NextResponse.json(
+      { message: "Erro ao buscar estudantes" },
+      { status: 500 }
+    );
   }
 }
 

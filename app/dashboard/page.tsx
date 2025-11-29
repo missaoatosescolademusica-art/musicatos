@@ -1,37 +1,57 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Users, MoreHorizontal, Eye, Edit2, Trash2, Search } from "lucide-react"
+import { useEffect } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { Badge } from "@/components/ui/badge";
+import { Users } from "lucide-react";
 import Image from "next/image";
-import { toast } from "sonner";
-import { StudentDialog } from "@/components/student-dialog";
+import { logout as logoutHandle, Student } from "./helper/handles";
+import { StudentsProvider, useStudents } from "./contexts/students-context";
+import { UIProvider, useUI } from "./contexts/ui-context";
+import { AuthProvider, useAuth } from "./contexts/auth-context";
 
-interface Student {
-  id: string;
-  fullName: string;
-  email: string;
-  phone: string;
-  address: string;
-  instruments: string[];
-  available: boolean;
-  createdAt: string;
-}
+import { StudentDialog } from "@/components/student-dialog";
+import Topbar from "./components/Topbar";
+import Sidebar from "./components/Sidebar";
+import SearchBar from "@/components/search/SearchBar";
+import DataTable from "@/components/shared/DataTable";
+import { ActionsDataTable } from "@/components/shared/ActionsDataTable";
 
 export default function DashboardPage() {
-  const [students, setStudents] = useState<Student[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [dialogMode, setDialogMode] = useState<"view" | "edit">("view");
+  return (
+    <AuthProvider>
+      <UIProvider>
+        <StudentsProvider>
+          <DashboardContent />
+        </StudentsProvider>
+      </UIProvider>
+    </AuthProvider>
+  );
+}
+
+function DashboardContent() {
+  const {
+    students,
+    loading,
+    searchQuery,
+    setSearchQuery,
+    currentPage,
+    setCurrentPage,
+    totalPages,
+    selectedStudent,
+    dialogOpen,
+    setDialogOpen,
+    dialogMode,
+    fetchStudents,
+    viewStudent,
+    editStudent,
+    deleteStudent,
+    saveStudent,
+  } = useStudents();
+  const { sidebarOpen, setSidebarOpen, touchStartX, setTouchStartX } = useUI();
+  const { me } = useAuth();
+  const pathname = usePathname();
+  const router = useRouter();
 
   const itemsPerPage = 10;
 
@@ -39,294 +59,158 @@ export default function DashboardPage() {
     fetchStudents();
   }, [currentPage, searchQuery]);
 
-  const fetchStudents = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch(
-        `/api/students?page=${currentPage}&search=${encodeURIComponent(
-          searchQuery
-        )}`
-      );
-      if (!response.ok) throw new Error("Failed to fetch students");
+  const isAdmin = me?.role === "admin";
 
-      const data = await response.json();
-      setStudents(data.students);
-      setTotalPages(data.totalPages);
-    } catch (error) {
-      toast.error("Erro ao carregar estudantes");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleViewStudent = (student: Student) => {
-    setSelectedStudent(student);
-    setDialogMode("view");
-    setDialogOpen(true);
-  };
-
-  const handleEditStudent = (student: Student) => {
-    setSelectedStudent(student);
-    setDialogMode("edit");
-    setDialogOpen(true);
-  };
-
-  const handleDeleteStudent = async (id: string) => {
-    if (!confirm("Tem certeza que deseja deletar este estudante?")) return
-
-    try {
-      const response = await fetch(`/api/students/${id}`, { method: "DELETE" })
-      if (!response.ok) throw new Error("Failed to delete")
-
-      toast.success("Estudante deletado com sucesso")
-      fetchStudents()
-    } catch (error) {
-      toast.error("Erro ao deletar estudante")
-    }
-  }
-
-  const handleSaveStudent = async (data: Omit<Student, "id" | "createdAt">) => {
-    if (!selectedStudent) return
-
-    try {
-      const response = await fetch(`/api/students/${selectedStudent.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      })
-
-      if (!response.ok) throw new Error("Failed to update")
-
-      toast.success("Estudante atualizado com sucesso")
-      setDialogOpen(false)
-      fetchStudents()
-    } catch (error) {
-      toast.error("Erro ao atualizar estudante")
-    }
-  }
+  const logout = async () => logoutHandle((path) => router.push(path));
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex flex-col items-center mb-2">
-            <Image
-              src="/Logo.jpg"
-              alt="Logo"
-              width={200}
-              height={100}
-              className="rounded mr-3 mb-10"
-            />
-            <div className="flex items-center">
-              <Users className="h-8 w-8 text-blue-400 mr-3" />
-              <h1 className="text-3xl font-bold text-white">
-                Painel Administrativo
-              </h1>
-            </div>
-          </div>
-          <p className="text-slate-400 text-center">
-            Gerencie todos os estudantes registrados
-          </p>
-        </div>
-
-        {/* Search and Controls */}
-        <Card className="bg-slate-800 border-slate-700 mb-6 p-4">
-          <div className="flex gap-4 items-center">
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-500" />
-              <Input
-                placeholder="Buscar por ID do estudante..."
-                value={searchQuery}
-                onChange={(e) => {
-                  setSearchQuery(e.target.value);
-                  setCurrentPage(1);
-                }}
-                className="pl-10 bg-slate-700 border-slate-600 text-white placeholder:text-slate-500"
-              />
-            </div>
-            <Button
-              onClick={() => fetchStudents()}
-              className="bg-blue-600 hover:bg-blue-700 text-white"
-            >
-              Atualizar
-            </Button>
-          </div>
-        </Card>
-
-        {/* Students Table */}
-        <Card className="bg-slate-800 border-slate-700 overflow-hidden shadow-xl">
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader className="bg-slate-700">
-                <TableRow className="border-slate-600 hover:bg-slate-700">
-                  <TableHead className="text-slate-300 font-semibold">
-                    ID
-                  </TableHead>
-                  <TableHead className="text-slate-300 font-semibold">
-                    Nome
-                  </TableHead>
-                  <TableHead className="text-slate-300 font-semibold">
-                    Email
-                  </TableHead>
-                  <TableHead className="text-slate-300 font-semibold">
-                    WhatsApp
-                  </TableHead>
-                  <TableHead className="text-slate-300 font-semibold">
-                    Instrumentos
-                  </TableHead>
-                  <TableHead className="text-slate-300 font-semibold">
-                    Disponível
-                  </TableHead>
-                  <TableHead className="text-slate-300 font-semibold text-right">
-                    Ações
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {loading ? (
-                  <TableRow>
-                    <TableCell
-                      colSpan={7}
-                      className="text-center py-8 text-slate-400"
-                    >
-                      Carregando...
-                    </TableCell>
-                  </TableRow>
-                ) : students.length === 0 ? (
-                  <TableRow>
-                    <TableCell
-                      colSpan={7}
-                      className="text-center py-8 text-slate-400"
-                    >
-                      Nenhum estudante encontrado
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  students.map((student) => (
-                    <TableRow
-                      key={student.id}
-                      className="border-slate-700 hover:bg-slate-700 transition"
-                    >
-                      <TableCell className="text-slate-300 font-mono text-sm">
-                        {student.id.slice(0, 8)}...
-                      </TableCell>
-                      <TableCell className="text-white font-medium">
-                        {student.fullName}
-                      </TableCell>
-                      <TableCell className="text-slate-300">
-                        {student.email}
-                      </TableCell>
-                      <TableCell className="text-slate-300">
-                        {student.phone}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex gap-1 flex-wrap">
-                          {student.instruments.map((instrument) => (
-                            <Badge
-                              key={instrument}
-                              variant="secondary"
-                              className="bg-blue-600 text-white"
-                            >
-                              {instrument}
-                            </Badge>
-                          ))}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          className={
-                            student.available
-                              ? "bg-green-600 text-white"
-                              : "bg-slate-600 text-slate-300"
-                          }
-                        >
-                          {student.available ? "Sim" : "Não"}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="text-slate-300 hover:text-white"
-                            >
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent
-                            align="end"
-                            className="bg-slate-700 border-slate-600"
-                          >
-                            <DropdownMenuItem
-                              onClick={() => handleViewStudent(student)}
-                              className="text-slate-200 cursor-pointer hover:bg-slate-600"
-                            >
-                              <Eye className="h-4 w-4 mr-2" />
-                              Visualizar
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => handleEditStudent(student)}
-                              className="text-slate-200 cursor-pointer hover:bg-slate-600"
-                            >
-                              <Edit2 className="h-4 w-4 mr-2" />
-                              Editar
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => handleDeleteStudent(student.id)}
-                              className="text-red-400 cursor-pointer hover:bg-slate-600"
-                            >
-                              <Trash2 className="h-4 w-4 mr-2" />
-                              Deletar
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </div>
-
-          {/* Pagination */}
-          <div className="bg-slate-700 px-6 py-4 flex items-center justify-between border-t border-slate-600">
-            <p className="text-slate-400 text-sm">
-              Página {currentPage} de {totalPages || 1}
-            </p>
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                disabled={currentPage === 1}
-                className="bg-slate-600 border-slate-500 text-slate-200 hover:bg-slate-500"
-              >
-                Anterior
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setCurrentPage(currentPage + 1)}
-                disabled={currentPage >= totalPages}
-                className="bg-slate-600 border-slate-500 text-slate-200 hover:bg-slate-500"
-              >
-                Próxima
-              </Button>
-            </div>
-          </div>
-        </Card>
-      </div>
-
-      {/* Student Dialog */}
-      <StudentDialog
-        open={dialogOpen}
-        onOpenChange={setDialogOpen}
-        student={selectedStudent}
-        mode={dialogMode}
-        onSave={handleSaveStudent}
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+      <Topbar
+        sidebarOpen={sidebarOpen}
+        onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+        me={me}
+        onLogout={logout}
+        breadcrumb={"Dashboard / Estudantes"}
       />
+
+      {sidebarOpen && (
+        <div
+          aria-hidden="true"
+          onClick={() => setSidebarOpen(false)}
+          onTouchStart={(e) => setTouchStartX(e.touches[0]?.clientX ?? null)}
+          onTouchMove={(e) => {
+            const x = e.touches[0]?.clientX ?? 0;
+            if (touchStartX !== null && Math.abs(x - touchStartX) > 50)
+              setSidebarOpen(false);
+          }}
+          className="fixed inset-0 top-14 md:hidden bg-black/50 z-30 transition-opacity duration-300"
+        />
+      )}
+
+      <div className="flex">
+        <Sidebar
+          sidebarOpen={sidebarOpen}
+          onCloseSidebar={() => setSidebarOpen(false)}
+          pathname={pathname}
+          isAdmin={isAdmin}
+          touchStartX={touchStartX}
+          setTouchStartX={setTouchStartX}
+        />
+
+        {/* Main Content */}
+        <main
+          className={`flex-1 w-full min-h-[calc(100vh-3.5rem)] flex items-center justify-center px-4 ${
+            sidebarOpen ? "md:pl-64" : ""
+          }`}
+        >
+          <div className="w-full max-w-[90vw] sm:max-w-md md:max-w-2xl lg:max-w-3xl xl:max-w-4xl">
+            {/* Header */}
+            <div className="mb-8">
+              <div className="flex flex-col items-center mb-2">
+                <Image
+                  src="/Logo.jpg"
+                  alt="Logo"
+                  width={200}
+                  height={100}
+                  className="rounded mr-3 mb-10"
+                />
+                <div className="flex items-center">
+                  <Users className="h-8 w-8 text-blue-400 mr-3" />
+                  <h1 className="text-3xl font-bold text-white">
+                    Painel Administrativo
+                  </h1>
+                </div>
+              </div>
+              <p className="text-slate-400 text-center">
+                Gerencie todos os alunos registrados
+              </p>
+            </div>
+
+            <SearchBar placeholder="Buscar por ID do estudante..." />
+
+            <DataTable
+              data={students}
+              loading={loading}
+              currentPage={currentPage}
+              totalPages={totalPages}
+              pageSize={10}
+              onPageChange={(p) => setCurrentPage(p)}
+              columns={[
+                {
+                  header: "ID",
+                  cellClassName: "text-slate-300 font-mono text-sm",
+                  render: (s: Student) => `${s.id.slice(0, 8)}...`,
+                },
+                {
+                  header: "Nome",
+                  cellClassName: "text-white font-medium",
+                  render: (s: Student) => s.fullName,
+                },
+                {
+                  header: "Email",
+                  cellClassName: "text-slate-300",
+                  render: (s: Student) => s.email,
+                },
+                {
+                  header: "WhatsApp",
+                  cellClassName: "text-slate-300",
+                  render: (s: Student) => s.phone,
+                },
+                {
+                  header: "Instrumentos",
+                  render: (s: Student) => (
+                    <div className="flex gap-1 flex-wrap">
+                      {s.instruments.map((instrument) => (
+                        <Badge
+                          key={instrument}
+                          variant="secondary"
+                          className="bg-blue-600 text-white"
+                        >
+                          {instrument}
+                        </Badge>
+                      ))}
+                    </div>
+                  ),
+                },
+                {
+                  header: "Disponível",
+                  render: (s: Student) => (
+                    <Badge
+                      className={
+                        s.available
+                          ? "bg-green-600 text-white"
+                          : "bg-slate-600 text-slate-300"
+                      }
+                    >
+                      {s.available ? "Sim" : "Não"}
+                    </Badge>
+                  ),
+                },
+                {
+                  header: "Ações",
+                  render: (s: Student) => (
+                    <ActionsDataTable
+                      viewStudent={() => viewStudent(s)}
+                      editStudent={() => editStudent(s)}
+                      deleteStudent={() => deleteStudent(s.id)}
+                      s={s}
+                    />
+                  ),
+                },
+              ]}
+            />
+          </div>
+
+          {/* Student Dialog */}
+          <StudentDialog
+            open={dialogOpen}
+            onOpenChange={setDialogOpen}
+            student={selectedStudent}
+            mode={dialogMode}
+            onSave={(data) => saveStudent(data)}
+          />
+        </main>
+      </div>
     </div>
   );
 }

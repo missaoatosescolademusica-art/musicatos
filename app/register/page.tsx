@@ -48,11 +48,24 @@ function RegisterPageContent() {
         headers: { "Content-Type": "application/json", "x-csrf-token": csrf || "" },
         body: JSON.stringify({ name, email, password, confirmPassword, role }),
       })
-      const data = await res.json().catch(() => ({}))
-      if (res.ok) {
-        toast.success("Registro realizado")
+      const ct = res.headers.get("content-type") || "";
+      if (res.redirected) {
+        window.location.replace(res.url);
+        return;
+      }
+      if (ct.includes("application/json")) {
+        const data = await res.json().catch(() => ({}));
+        if (res.ok) {
+          window.location.replace("/dashboard");
+        } else {
+          toast.error(data.message || "Erro de validação");
+        }
       } else {
-        toast.error(data.message || "Erro de validação")
+        if (res.ok) {
+          window.location.replace("/dashboard");
+        } else {
+          toast.error("Erro de servidor");
+        }
       }
     } catch {
       toast.error("Erro de servidor")

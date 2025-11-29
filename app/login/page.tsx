@@ -42,7 +42,13 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-slate-900 text-white flex items-center justify-center p-4">
       <div className="w-full max-w-md bg-slate-800 border border-slate-700 rounded-lg p-6 space-y-4">
-        <Image src="/logo.jpg" alt="Logo" width={128} height={128} className="mx-auto rounded-full" />
+        <Image
+          src="/Logo.jpg"
+          alt="Logo"
+          width={128}
+          height={128}
+          className="mx-auto rounded-full"
+        />
         <div className="flex items-center gap-2 mb-2">
           <LogIn className="h-6 w-6 text-blue-400" />
           <h1 className="text-xl font-semibold pb-2">Entrar</h1>

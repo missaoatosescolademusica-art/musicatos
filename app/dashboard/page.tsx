@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Users } from "lucide-react";
 import Image from "next/image";
-import { logout as logoutHandle, Student } from "./helper/handles";
+import { logout as logoutHandle } from "./helper/handles";
 import { StudentsProvider, useStudents } from "./contexts/students-context";
 import { UIProvider, useUI } from "./contexts/ui-context";
 import { AuthProvider, useAuth } from "./contexts/auth-context";
@@ -16,6 +16,7 @@ import Sidebar from "./components/Sidebar";
 import SearchBar from "@/components/search/SearchBar";
 import DataTable from "@/components/shared/DataTable";
 import { ActionsDataTable } from "@/components/shared/ActionsDataTable";
+import { Student } from "../types/students";
 
 export default function DashboardPage() {
   return (
@@ -112,7 +113,7 @@ function DashboardContent() {
                   alt="Logo"
                   width={200}
                   height={100}
-                  className="rounded mr-3 mb-10"
+                  className="rounded-full mr-3 mb-10"
                 />
                 <div className="flex items-center">
                   <Users className="h-8 w-8 text-blue-400 mr-3" />

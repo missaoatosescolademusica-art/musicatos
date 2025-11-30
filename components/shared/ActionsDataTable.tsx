@@ -1,4 +1,4 @@
-import { Student } from "@/app/dashboard/helper/handles";
+import { Student } from "@/app/types/students";
 import { Button } from "@/components/ui/button";
 
 import {
@@ -12,12 +12,14 @@ export const ActionsDataTable = ({
   viewStudent,
   editStudent,
   deleteStudent,
-  s
+  s,
+  canDelete = true,
 }: {
-  viewStudent: (student: Student) => void
-  editStudent: (student: Student) => void
-  deleteStudent: (id: string) => void,
-  s:Student
+  viewStudent: (student: Student) => void;
+  editStudent: (student: Student) => void;
+  deleteStudent: (id: string) => void;
+  s: Student;
+  canDelete?: boolean;
 }) => {
   return (
     <div className="text-right">
@@ -49,13 +51,15 @@ export const ActionsDataTable = ({
             <Edit2 className="h-4 w-4 mr-2" />
             Editar
           </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={() => deleteStudent(s.id || "")}
-            className="text-red-400 cursor-pointer hover:bg-slate-600"
-          >
-            <Trash2 className="h-4 w-4 mr-2" />
-            Deletar
-          </DropdownMenuItem>
+          {canDelete && (
+            <DropdownMenuItem
+              onClick={() => deleteStudent(s.id || "")}
+              className="text-red-400 cursor-pointer hover:bg-slate-600"
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              Deletar
+            </DropdownMenuItem>
+          )}
         </DropdownMenuContent>
       </DropdownMenu>
     </div>

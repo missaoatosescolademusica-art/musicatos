@@ -15,7 +15,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       .then(async (r) => {
         if (r.ok) {
           const data = await r.json()
-          setMe({ name: data.name, role: data.role })
+          setMe({ id: data.id, name: data.name, role: data.role, avatarUrl: data.avatarUrl })
         }
       })
       .catch(() => {})
@@ -32,4 +32,3 @@ export function useAuth() {
   if (!ctx) throw new Error("useAuth deve ser usado dentro de AuthProvider")
   return ctx
 }
-

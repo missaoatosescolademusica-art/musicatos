@@ -1,7 +1,8 @@
 export interface Student {
   id: string;
   fullName: string;
-  email: string;
+  nameFather: string;
+  nameMother: string;
   phone: string;
   address: string;
   instruments: string[];

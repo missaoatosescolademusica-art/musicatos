@@ -1,5 +1,7 @@
 import bcrypt from "bcryptjs"
 import jwt from "jsonwebtoken"
+import { jwtVerify } from "jose"
+import type { NextRequest } from "next/server"
 
 export function validateEmail(email: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
@@ -52,4 +54,28 @@ export function verifyOrigin(req: Request) {
 export function verifyCsrf(req: Request, csrfCookie: string | undefined) {
   const header = req.headers.get("x-csrf-token") || ""
   return csrfCookie && header && csrfCookie === header
+}
+
+export async function getAuthInfo(req: NextRequest | Request): Promise<{ userId: string; role: string } | null> {
+  let token = ""
+  const anyReq = req as any
+  try {
+    const c = anyReq.cookies?.get?.("auth")?.value
+    if (c) token = c
+  } catch {}
+  if (!token) {
+    const cookies = req.headers.get("cookie") || ""
+    const m = /(?:^|;\s*)auth=([^;]+)/.exec(cookies)
+    token = m?.[1] || ""
+  }
+  if (!token) return null
+  const secret = new TextEncoder().encode(process.env.JWT_SECRET || "dev-secret")
+  try {
+    const { payload } = await jwtVerify(token, secret)
+    const userId = String(payload.sub || "")
+    const role = String((payload as any).role || "")
+    return userId ? { userId, role } : null
+  } catch {
+    return null
+  }
 }

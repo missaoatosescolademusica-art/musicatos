@@ -45,12 +45,52 @@ npm run dev
 
 ---
 
-## 🗺️ Rotas da API
+## API
 
 | Método | Rota       | Descrição            | Parâmetros   |
 |--------|------------|----------------------|--------------|
 | GET    | /api/users | Lista todos usuários | page, limit  |
 | POST   | /api/auth  | Autenticação         | email, pwd   |
+
+### Presença (Lista de Chamada)
+
+| Método | Rota                    | Descrição                                   |
+|--------|-------------------------|---------------------------------------------|
+| GET    | `/api/attendance`       | Lista presença com filtros e paginação      |
+| POST   | `/api/attendance`       | Marca presença do aluno                     |
+| PUT    | `/api/attendance/:id`   | Atualiza status da presença (admin)         |
+| DELETE | `/api/attendance/:id`   | Remove registro de presença (admin)         |
+
+Filtros suportados em `GET /api/attendance`:
+- `page`, `limit`
+- `status` (`PRESENT`, `ABSENT`, `LATE`)
+- `date` (`YYYY-MM-DD`)
+- `q` (nome/email do aluno)
+
+Segurança:
+- Autenticação via cookie `auth` (`httpOnly`).
+- Atualizações e exclusões restringidas a usuários com `role=admin`.
+
+Logs de auditoria:
+- Criados em `AuditLog` para operações `CREATE`, `UPDATE`, `DELETE` sobre `Attendance`.
+
+### Modelos (Prisma)
+
+```
+enum AttendanceStatus { PRESENT ABSENT LATE }
+model Attendance { id studentId status timestamp markedById notes? }
+model AuditLog { id action entity entityId userId metadata? createdAt }
+```
+
+### Migrações
+- Atualize o schema: `npx prisma migrate dev -n add-attendance`
+- Gere o client: `npx prisma generate`
+
+### Manual (Admin)
+- Acesse “Lista de Chamada” no menu.
+- Use filtros (status, data, busca) e navegação por páginas.
+- Botões “Presente/Ausente/Atraso” criam registros imediatos.
+- Para correções, utilize as ações administrativas disponíveis (PUT/DELETE via API ou UI, quando habilitado).
 
 ---
 

@@ -26,7 +26,7 @@ export type StudentsContextState = {
   saveStudent: (data: Omit<Student, "id" | "createdAt">) => Promise<void>
 }
 
-export type AuthUser = { name: string; role: string }
+export type AuthUser = { id: string; name: string; role: string; avatarUrl?: string }
 
 export type AuthContextState = {
   me: AuthUser | null

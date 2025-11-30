@@ -8,84 +8,97 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
-import { MultiSelect } from "@/components/multi-select"
 
 const INSTRUMENTS = ["Violão", "Canto", "Teclado", "Bateria"]
 
 interface Student {
-  id: string
-  fullName: string
-  email: string
-  phone: string
-  address: string
-  instruments: string[]
-  available: boolean
-  createdAt: string
+  id: string;
+  fullName: string;
+  nameFather: string;
+  nameMother: string;
+  phone: string;
+  address: string;
+  instruments: string[];
+  available: boolean;
+  createdAt: string;
 }
 
 interface StudentDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  student: Student | null
-  mode: "view" | "edit"
-  onSave: (student: Omit<Student, "id" | "createdAt">) => Promise<void>
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  student: Student | null;
+  mode: "view" | "edit";
+  onSave: (student: Omit<Student, "id" | "createdAt">) => Promise<void>;
 }
 
-export function StudentDialog({ open, onOpenChange, student, mode, onSave }: StudentDialogProps) {
+export function StudentDialog({
+  open,
+  onOpenChange,
+  student,
+  mode,
+  onSave,
+}: StudentDialogProps) {
   const [formData, setFormData] = useState<Omit<Student, "id" | "createdAt">>({
     fullName: "",
-    email: "",
+    nameFather: "",
+    nameMother: "",
     phone: "",
     address: "",
     instruments: [],
     available: true,
-  })
-  const [saving, setSaving] = useState(false)
+  });
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (student) {
       setFormData({
         fullName: student.fullName,
-        email: student.email,
+        nameFather: student.nameFather,
+        nameMother: student.nameMother,
         phone: student.phone,
         address: student.address,
         instruments: student.instruments,
         available: student.available,
-      })
+      });
     }
-  }, [student, open])
+  }, [student, open]);
 
   const handleSave = async () => {
-    setSaving(true)
+    setSaving(true);
     try {
-      await onSave(formData)
-      onOpenChange(false)
+      await onSave(formData);
+      onOpenChange(false);
     } finally {
-      setSaving(false)
+      setSaving(false);
     }
-  }
+  };
 
   const formatPhone = (value: string) => {
-    const cleaned = value.replace(/\D/g, "")
+    const cleaned = value.replace(/\D/g, "");
     if (cleaned.length <= 2) {
-      return cleaned
+      return cleaned;
     }
 
     if (cleaned.length <= 7) {
-      return `(${cleaned.slice(0, 2)}) ${cleaned.slice(2)}`
+      return `(${cleaned.slice(0, 2)}) ${cleaned.slice(2)}`;
     }
 
     if (cleaned.length <= 12) {
-      return `(${cleaned.slice(0, 2)}) ${cleaned.slice(2, 7)} - ${cleaned.slice(7)}`
+      return `(${cleaned.slice(0, 2)}) ${cleaned.slice(2, 7)} - ${cleaned.slice(
+        7
+      )}`;
     }
 
-    return `(${cleaned.slice(0, 2)}) ${cleaned.slice(2, 7)} - ${cleaned.slice(7, 12)}`
-  }
+    return `(${cleaned.slice(0, 2)}) ${cleaned.slice(2, 7)} - ${cleaned.slice(
+      7,
+      12
+    )}`;
+  };
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const formatted = formatPhone(e.target.value)
-    setFormData({ ...formData, phone: formatted })
-  }
+    const formatted = formatPhone(e.target.value);
+    setFormData({ ...formData, phone: formatted });
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -95,28 +108,53 @@ export function StudentDialog({ open, onOpenChange, student, mode, onSave }: Stu
             {mode === "view" ? "Detalhes do Estudante" : "Editar Estudante"}
           </DialogTitle>
           <DialogDescription className="text-slate-400">
-            {mode === "view" ? "Visualize as informações do estudante" : "Edite as informações do estudante"}
+            {mode === "view"
+              ? "Visualize as informações do estudante"
+              : "Edite as informações do estudante"}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
           {/* Full Name */}
           <div>
-            <Label className="text-slate-200 text-sm font-medium">Nome Completo</Label>
+            <Label className="text-slate-200 text-sm font-medium">
+              Nome Completo
+            </Label>
             <Input
               value={formData.fullName}
-              onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, fullName: e.target.value })
+              }
               disabled={mode === "view"}
               className="mt-1 bg-slate-700 border-slate-600 text-white disabled:opacity-60"
             />
           </div>
 
-          {/* Email */}
+          {/* Name Father */}
           <div>
-            <Label className="text-slate-200 text-sm font-medium">Email</Label>
+            <Label className="text-slate-200 text-sm font-medium">
+              Nome do Pai
+            </Label>
             <Input
-              value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              value={formData.nameFather}
+              onChange={(e) =>
+                setFormData({ ...formData, nameFather: e.target.value })
+              }
+              disabled={mode === "view"}
+              className="mt-1 bg-slate-700 border-slate-600 text-white disabled:opacity-60"
+            />
+          </div>
+
+          {/* Name Mother */}
+          <div>
+            <Label className="text-slate-200 text-sm font-medium">
+              Nome da Mãe
+            </Label>
+            <Input
+              value={formData.nameMother}
+              onChange={(e) =>
+                setFormData({ ...formData, nameMother: e.target.value })
+              }
               disabled={mode === "view"}
               className="mt-1 bg-slate-700 border-slate-600 text-white disabled:opacity-60"
             />
@@ -124,7 +162,9 @@ export function StudentDialog({ open, onOpenChange, student, mode, onSave }: Stu
 
           {/* Phone */}
           <div>
-            <Label className="text-slate-200 text-sm font-medium">WhatsApp</Label>
+            <Label className="text-slate-200 text-sm font-medium">
+              WhatsApp
+            </Label>
             <Input
               value={formData.phone}
               onChange={handlePhoneChange}
@@ -136,10 +176,14 @@ export function StudentDialog({ open, onOpenChange, student, mode, onSave }: Stu
 
           {/* Address */}
           <div>
-            <Label className="text-slate-200 text-sm font-medium">Endereço</Label>
+            <Label className="text-slate-200 text-sm font-medium">
+              Endereço
+            </Label>
             <Input
               value={formData.address}
-              onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, address: e.target.value })
+              }
               disabled={mode === "view"}
               className="mt-1 bg-slate-700 border-slate-600 text-white disabled:opacity-60"
             />
@@ -147,21 +191,38 @@ export function StudentDialog({ open, onOpenChange, student, mode, onSave }: Stu
 
           {/* Instruments */}
           <div>
-            <Label className="text-slate-200 text-sm font-medium">Instrumentos</Label>
+            <Label className="text-slate-200 text-sm font-medium">
+              Instrumentos
+            </Label>
             {mode === "view" ? (
               <div className="mt-1 flex gap-2 flex-wrap">
                 {formData.instruments.map((instrument) => (
-                  <span key={instrument} className="inline-block bg-blue-600 text-white text-sm px-3 py-1 rounded">
+                  <span
+                    key={instrument}
+                    className="inline-block bg-blue-600 text-white text-sm px-3 py-1 rounded"
+                  >
                     {instrument}
                   </span>
                 ))}
               </div>
             ) : (
-              <MultiSelect
-                options={INSTRUMENTS}
-                selected={formData.instruments}
-                onChange={(instruments) => setFormData({ ...formData, instruments })}
-              />
+              <select
+                value={formData.instruments[0] ?? ""}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    instruments: e.target.value ? [e.target.value] : [],
+                  })
+                }
+                className="bg-slate-700 border border-slate-600 text-white mt-1 rounded p-2 w-full"
+              >
+                <option value="">Selecione um instrumento</option>
+                {INSTRUMENTS.map((opt) => (
+                  <option key={opt} value={opt}>
+                    {opt}
+                  </option>
+                ))}
+              </select>
             )}
           </div>
 
@@ -169,11 +230,15 @@ export function StudentDialog({ open, onOpenChange, student, mode, onSave }: Stu
           <div className="flex items-center space-x-3 pt-2">
             <Checkbox
               checked={formData.available}
-              onCheckedChange={(checked) => setFormData({ ...formData, available: checked as boolean })}
+              onCheckedChange={(checked) =>
+                setFormData({ ...formData, available: checked as boolean })
+              }
               disabled={mode === "view"}
               className="border-slate-600 bg-slate-700 disabled:opacity-60"
             />
-            <Label className="text-slate-300 font-normal cursor-pointer">Disponível para aulas</Label>
+            <Label className="text-slate-300 font-normal cursor-pointer">
+              Disponível para aulas
+            </Label>
           </div>
         </div>
 
@@ -187,12 +252,16 @@ export function StudentDialog({ open, onOpenChange, student, mode, onSave }: Stu
             {mode === "view" ? "Fechar" : "Cancelar"}
           </Button>
           {mode === "edit" && (
-            <Button onClick={handleSave} disabled={saving} className="bg-blue-600 hover:bg-blue-700 text-white">
+            <Button
+              onClick={handleSave}
+              disabled={saving}
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+            >
               {saving ? "Salvando..." : "Salvar Alterações"}
             </Button>
           )}
         </div>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

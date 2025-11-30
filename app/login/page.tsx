@@ -65,7 +65,7 @@ export default function LoginPage() {
         backgroundRepeat: "no-repeat",
       }}
     >
-      <div className="absolute inset-0 bg-gradient-to-br from-slate-900/70 via-slate-800/70 to-slate-900/70 pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-br from-gray-50/70 via-gray-100/70 to-gray-200/70 dark:from-slate-900/70 dark:via-slate-800/70 dark:to-slate-900/70 pointer-events-none" />
       <div className="relative z-10 flex items-center justify-center p-4">
         <div className="w-full max-w-md bg-slate-800 border border-slate-700 rounded-lg p-6 space-y-4">
           <Image

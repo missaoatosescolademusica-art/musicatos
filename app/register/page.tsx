@@ -8,46 +8,77 @@ import { Button } from "@/components/ui/button"
 import { Eye, EyeOff, UserPlus, Menu, UserCog, Home, LogOut } from "lucide-react"
 import { toast } from "sonner"
 import Image from "next/image"
-import { UIProvider, useUI } from "./contexts/ui-context"
-import { AuthProvider, useAuth } from "./contexts/auth-context"
-import { RegisterFormProvider, useRegisterForm } from "./contexts/register-form-context"
+import { UIProvider, useUI } from "@/app/dashboard/contexts/ui-context";
+import { AuthProvider, useAuth } from "@/app/dashboard/contexts/auth-context";
+import {
+  RegisterFormProvider,
+  useRegisterForm,
+} from "./contexts/register-form-context";
+import FloatingAttendanceFAB from "@/components/attendance/FloatingAttendanceFAB";
+import Topbar from "@/app/dashboard/components/Topbar";
+import Sidebar from "@/app/dashboard/components/Sidebar";
+import { StatusProvider } from "@/app/dashboard/contexts/status-context";
 
 function RegisterPageContent() {
-  const router = useRouter()
-  const pathname = usePathname()
-  const { sidebarOpen, setSidebarOpen, touchStartX, setTouchStartX } = useUI()
-  const { me, authChecked } = useAuth()
-  const { name, setName, email, setEmail, password, setPassword, confirmPassword, setConfirmPassword, show1, setShow1, show2, setShow2, role, setRole, loading, setLoading } = useRegisterForm()
+  const router = useRouter();
+  const pathname = usePathname();
+  const { sidebarOpen, setSidebarOpen, touchStartX, setTouchStartX } = useUI();
+  const { me, authChecked } = useAuth();
+  const {
+    name,
+    setName,
+    email,
+    setEmail,
+    password,
+    setPassword,
+    confirmPassword,
+    setConfirmPassword,
+    show1,
+    setShow1,
+    show2,
+    setShow2,
+    role,
+    setRole,
+    loading,
+    setLoading,
+  } = useRegisterForm();
 
   useEffect(() => {
-    fetch("/api/auth/csrf").catch(() => {})
-  }, [])
+    fetch("/api/auth/csrf").catch(() => {});
+  }, []);
 
   // Auth fetch deslocado para AuthProvider
 
   useEffect(() => {
     try {
-      const saved = localStorage.getItem("sidebarOpen")
-      if (saved !== null) setSidebarOpen(saved === "true")
+      const saved = localStorage.getItem("sidebarOpen");
+      if (saved !== null) setSidebarOpen(saved === "true");
     } catch {}
-    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setSidebarOpen(false) }
-    window.addEventListener("keydown", onKey)
-    return () => window.removeEventListener("keydown", onKey)
-  }, [])
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setSidebarOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
 
   useEffect(() => {
-    try { localStorage.setItem("sidebarOpen", String(sidebarOpen)) } catch {}
-  }, [sidebarOpen])
+    try {
+      localStorage.setItem("sidebarOpen", String(sidebarOpen));
+    } catch {}
+  }, [sidebarOpen]);
 
   const submit = async () => {
-    setLoading(true)
+    setLoading(true);
     try {
-      const csrf = getCookie("csrfToken")
+      const csrf = getCookie("csrfToken");
       const res = await fetch("/api/auth/register", {
         method: "POST",
-        headers: { "Content-Type": "application/json", "x-csrf-token": csrf || "" },
+        headers: {
+          "Content-Type": "application/json",
+          "x-csrf-token": csrf || "",
+        },
         body: JSON.stringify({ name, email, password, confirmPassword, role }),
-      })
+      });
       const ct = res.headers.get("content-type") || "";
       if (res.redirected) {
         window.location.replace(res.url);
@@ -68,62 +99,31 @@ function RegisterPageContent() {
         }
       }
     } catch {
-      toast.error("Erro de servidor")
+      toast.error("Erro de servidor");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
-  const isAuthed = !!me && authChecked
+  const isAuthed = !!me && authChecked;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
       {isAuthed && (
-        <header className="sticky top-0 z-40 bg-slate-900/80 backdrop-blur border-b border-slate-800">
-          <div className="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <button
-                aria-label="Abrir menu"
-                aria-controls="app-sidebar"
-                aria-expanded={sidebarOpen}
-                className="p-2 rounded hover:bg-slate-800 transition"
-                onClick={() => setSidebarOpen(!sidebarOpen)}
-              >
-                <Menu className="h-5 w-5 text-slate-300" />
-              </button>
-              <nav aria-label="Breadcrumb" className="text-slate-400 text-sm">
-                Dashboard <span className="mx-1">/</span> Cadastrar Usuários
-              </nav>
-            </div>
-            <div className="flex items-center gap-4">
-              {me && (
-                <div
-                  className="flex items-center gap-2"
-                  aria-label="Perfil do usuário"
-                >
-                  <div
-                    className="h-8 w-8 rounded-full bg-blue-600 text-white flex items-center justify-center"
-                    aria-hidden
-                  >
-                    {me.name?.charAt(0).toUpperCase()}
-                  </div>
-                  <span className="text-slate-200 text-sm">{me.name}</span>
-                </div>
-              )}
-              <Button
-                variant="ghost"
-                onClick={async () => {
-                  await fetch("/api/auth/logout", { method: "POST" });
-                  router.push("/login");
-                }}
-                aria-label="Sair"
-                className="text-slate-300 hover:text-white"
-              >
-                <LogOut className="h-4 w-4 mr-2" /> Logout
-              </Button>
-            </div>
-          </div>
-        </header>
+        <Topbar
+          sidebarOpen={sidebarOpen}
+          onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+          me={{
+            name: me?.name ?? "",
+            avatarUrl: me?.avatarUrl ?? undefined,
+            role: me?.role ?? "",
+          }}
+          onLogout={async () => {
+            await fetch("/api/auth/logout", { method: "POST" });
+            router.push("/login");
+          }}
+          breadcrumb={"Dashboard / Cadastrar Usuários"}
+        />
       )}
 
       {isAuthed && sidebarOpen && (
@@ -142,82 +142,22 @@ function RegisterPageContent() {
 
       <div className="flex">
         {isAuthed && (
-          <aside
-            id="app-sidebar"
-            aria-label="Navegação lateral"
-            tabIndex={0}
-            onTouchStart={(e) => setTouchStartX(e.touches[0]?.clientX ?? null)}
-            onTouchMove={(e) => {
-              const x = e.touches[0]?.clientX ?? 0;
-              if (touchStartX !== null && Math.abs(x - touchStartX) > 50)
-                setSidebarOpen(false);
-            }}
-            className={`fixed md:static left-0 top-14 md:top-0 h-[calc(100vh-3.5rem)] md:h-auto w-64 transform transition-transform duration-300 ease-out ${
-              sidebarOpen ? "translate-x-0" : "-translate-x-full"
-            } bg-slate-800 border-r border-slate-700 z-40`}
-          >
-            <div className="p-4 border-b border-slate-700 flex items-center gap-2">
-              <Image
-                src="/Logo.jpg"
-                alt="Logo"
-                width={36}
-                height={36}
-                className="rounded"
-              />
-              <span className="text-slate-200 font-semibold">Missão Atos</span>
-            </div>
-            <nav className="p-2 space-y-1">
-              <Link
-                href="/"
-                className={`flex items-center gap-2 px-3 py-2 rounded hover:bg-slate-700 transition ${
-                  pathname === "/"
-                    ? "bg-slate-700 text-white"
-                    : "text-slate-300"
-                }`}
-                onClick={() => setSidebarOpen(false)}
-                aria-current={pathname === "/" ? "page" : undefined}
-              >
-                <UserPlus className="h-4 w-4" />
-                <span>Adicionar Estudante</span>
-              </Link>
-              {me?.role === "admin" && (
-                <Link
-                  href="/register"
-                  className={`flex items-center gap-2 px-3 py-2 rounded hover:bg-slate-700 transition ${
-                    pathname === "/register"
-                      ? "bg-slate-700 text-white"
-                      : "text-slate-300"
-                  }`}
-                  onClick={() => setSidebarOpen(false)}
-                  aria-current={pathname === "/register" ? "page" : undefined}
-                >
-                  <UserCog className="h-4 w-4" />
-                  <span>Cadastrar Usuários</span>
-                </Link>
-              )}
-              <Link
-                href="/dashboard"
-                className={`flex items-center gap-2 px-3 py-2 rounded hover:bg-slate-700 transition ${
-                  pathname === "/dashboard"
-                    ? "bg-slate-700 text-white"
-                    : "text-slate-300"
-                }`}
-                onClick={() => setSidebarOpen(false)}
-                aria-current={pathname === "/dashboard" ? "page" : undefined}
-              >
-                <Home className="h-4 w-4" />
-                <span>Dashboard</span>
-              </Link>
-            </nav>
-          </aside>
+          <Sidebar
+            sidebarOpen={sidebarOpen}
+            onCloseSidebar={() => setSidebarOpen(false)}
+            pathname={pathname}
+            isAdmin={me?.role === "admin"}
+            touchStartX={touchStartX}
+            setTouchStartX={setTouchStartX}
+          />
         )}
 
         <main
-          className={`flex-1 w-full min-h-[calc(100vh-3.5rem)] flex items-center justify-center px-4 ${
+          className={`flex-1 w-full min-h-[calc(100vh-3.5rem)] flex items-center justify-center px-4 py-10 ${
             isAuthed && sidebarOpen ? "md:pl-64" : ""
           }`}
         >
-          <div className="w-full max-w-md bg-slate-800 border border-slate-700 rounded-lg p-6 space-y-4">
+          <div className="w-full max-w-md bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg p-6 space-y-4">
             <Image
               src="/Logo.jpg"
               alt="Logo"
@@ -227,10 +167,14 @@ function RegisterPageContent() {
             />
             <div className="flex items-center gap-2 mb-2">
               <UserPlus className="h-6 w-6 text-blue-400" />
-              <h1 className="text-xl font-semibold">Registrar</h1>
+              <h1 className="text-xl text-slate-900 dark:text-slate-300 font-semibold">
+                Registrar
+              </h1>
             </div>
             <div>
-              <Label className="text-slate-300">Nome completo</Label>
+              <Label className="text-slate-900 dark:text-slate-300">
+                Nome completo
+              </Label>
               <Input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
@@ -238,7 +182,9 @@ function RegisterPageContent() {
               />
             </div>
             <div>
-              <Label className="text-slate-300">Email</Label>
+              <Label className="text-slate-900 dark:text-slate-300">
+                Email
+              </Label>
               <Input
                 type="email"
                 value={email}
@@ -247,7 +193,9 @@ function RegisterPageContent() {
               />
             </div>
             <div>
-              <Label className="text-slate-300">Senha</Label>
+              <Label className="text-slate-900 dark:text-slate-300">
+                Senha
+              </Label>
               <div className="relative">
                 <Input
                   type={show1 ? "text" : "password"}
@@ -269,7 +217,9 @@ function RegisterPageContent() {
               </div>
             </div>
             <div>
-              <Label className="text-slate-300">Confirmar senha</Label>
+              <Label className="text-slate-900 dark:text-slate-300">
+                Confirmar senha
+              </Label>
               <div className="relative">
                 <Input
                   type={show2 ? "text" : "password"}
@@ -291,7 +241,9 @@ function RegisterPageContent() {
               </div>
             </div>
             <div>
-              <Label className="text-slate-300">Tipo de usuário</Label>
+              <Label className="text-slate-900 dark:text-slate-300">
+                Tipo de usuário
+              </Label>
               <select
                 value={role}
                 onChange={(e) => setRole(e.target.value)}
@@ -299,8 +251,9 @@ function RegisterPageContent() {
               >
                 <option value="user">Usuário</option>
                 <option value="admin">Admin</option>
+                <option value="professor">Professor</option>
               </select>
-              <p className="text-slate-400 text-xs mt-1">
+              <p className="text-slate-800 dark:text-slate-400 text-xs mt-1">
                 Admin requer cabeçalho de convite válido
               </p>
             </div>
@@ -314,6 +267,7 @@ function RegisterPageContent() {
           </div>
         </main>
       </div>
+      {isAuthed && <FloatingAttendanceFAB />}
     </div>
   );
 }
@@ -322,12 +276,14 @@ export default function RegisterPage() {
   return (
     <AuthProvider>
       <UIProvider>
-        <RegisterFormProvider>
-          <RegisterPageContent />
-        </RegisterFormProvider>
+        <StatusProvider>
+          <RegisterFormProvider>
+            <RegisterPageContent />
+          </RegisterFormProvider>
+        </StatusProvider>
       </UIProvider>
     </AuthProvider>
-  )
+  );
 }
 
 function getCookie(name: string) {

@@ -75,10 +75,10 @@ export default function DataTable<T>({
   pageSize,
   onPageChange,
   onRowClick,
-  containerClassName = "bg-slate-800 border-slate-700 overflow-hidden shadow-xl",
+  containerClassName = "bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700 overflow-hidden shadow-xl",
   tableClassName,
-  headerRowClassName = "bg-slate-700",
-  bodyRowClassName = "border-slate-700 hover:bg-slate-700 transition",
+  headerRowClassName = "bg-slate-100 dark:bg-slate-800",
+  bodyRowClassName = "border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 transition",
   extraTopRight,
 }: DataTableProps<T>) {
   return (
@@ -86,9 +86,15 @@ export default function DataTable<T>({
       <div className="overflow-x-auto">
         <Table className={tableClassName}>
           <TableHeader className={headerRowClassName}>
-            <TableRow className="border-slate-600 hover:bg-slate-700">
+            <TableRow className="border-slate-300 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700">
               {columns.map((col, idx) => (
-                <TableHead key={idx} className={col.headerClassName ?? "text-slate-300 font-semibold"}>
+                <TableHead
+                  key={idx}
+                  className={
+                    col.headerClassName ??
+                    "text-slate-100 dark:text-slate-300 font-semibold"
+                  }
+                >
                   {col.header}
                 </TableHead>
               ))}
@@ -97,13 +103,19 @@ export default function DataTable<T>({
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={columns.length} className="text-center py-8 text-slate-400">
+                <TableCell
+                  colSpan={columns.length}
+                  className="text-center py-8 text-slate-800 dark:text-slate-400"
+                >
                   Carregando...
                 </TableCell>
               </TableRow>
             ) : data.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={columns.length} className="text-center py-8 text-slate-400">
+                <TableCell
+                  colSpan={columns.length}
+                  className="text-center py-8 text-slate-800 dark:text-slate-400"
+                >
                   {emptyMessage}
                 </TableCell>
               </TableRow>
@@ -115,7 +127,12 @@ export default function DataTable<T>({
                   onClick={onRowClick ? () => onRowClick(item) : undefined}
                 >
                   {columns.map((col, idx) => (
-                    <TableCell key={idx} className={col.cellClassName}>
+                    <TableCell
+                      key={idx}
+                      className={
+                        col.cellClassName ?? "text-slate-900 dark:text-white"
+                      }
+                    >
                       {col.render(item)}
                     </TableCell>
                   ))}
@@ -126,8 +143,8 @@ export default function DataTable<T>({
         </Table>
       </div>
 
-      <div className="bg-slate-700 px-6 py-4 flex items-center justify-between border-t border-slate-600">
-        <p className="text-slate-400 text-sm">
+      <div className="bg-slate-200 dark:bg-slate-700 px-6 py-4 flex items-center justify-between border-t border-slate-300 dark:border-slate-600">
+        <p className="text-slate-800 dark:text-slate-400 text-sm">
           Página {currentPage} de {totalPages || 1}
           {pageSize ? ` • ${data.length} / ${pageSize} itens` : ""}
         </p>
@@ -154,6 +171,5 @@ export default function DataTable<T>({
         </div>
       </div>
     </Card>
-  )
+  );
 }
-

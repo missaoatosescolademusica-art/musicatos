@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/db"
 import { jwtVerify } from "jose"
+import fs from "fs";
+import path from "path";
 
 export async function GET(request: NextRequest) {
   try {
@@ -18,7 +20,32 @@ export async function GET(request: NextRequest) {
 
     if (!user) return NextResponse.json({ message: "Usuário não encontrado" }, { status: 404 })
 
-    return NextResponse.json({ id: user.id, name: user.name, role: user.role.name })
+    let avatarUrl: string | undefined = user.avatarUrl || undefined;
+    if (!avatarUrl) {
+      const av = await prisma.userAvatar.findUnique({
+        where: { userId: user.id },
+      });
+      if (av) avatarUrl = `/api/user/avatar?user=${user.id}&v=${Date.now()}`;
+      else {
+        const pub = path.join(process.cwd(), "public", "avatars");
+        const exts = ["png", "jpg", "jpeg", "webp"];
+        for (const ext of exts) {
+          const fp = path.join(pub, `${user.id}.${ext}`);
+          if (fs.existsSync(fp)) {
+            const stat = fs.statSync(fp);
+            avatarUrl = `/avatars/${user.id}.${ext}?v=${stat.mtimeMs}`;
+            break;
+          }
+        }
+      }
+    }
+
+    return NextResponse.json({
+      id: user.id,
+      name: user.name,
+      role: user.role.name,
+      avatarUrl,
+    });
   } catch {
     return NextResponse.json({ message: "Token inválido" }, { status: 401 })
   }

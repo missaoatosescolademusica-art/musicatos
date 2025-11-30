@@ -9,42 +9,34 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Checkbox } from "@/components/ui/checkbox"
-import { MultiSelect } from "@/components/multi-select"
-import { toast } from "sonner"
-import { Music, Menu, UserPlus, UserCog, Home, LogOut } from "lucide-react"
+import { Checkbox } from "@/components/ui/checkbox";
+import { toast } from "sonner";
+import { Music, Menu, UserPlus, UserCog, Home, LogOut } from "lucide-react";
 import Image from "next/image";
+import Topbar from "@/app/dashboard/components/Topbar";
+import { AuthProvider, useAuth } from "@/app/dashboard/contexts/auth-context";
+import { StatusProvider } from "@/app/dashboard/contexts/status-context";
 
 const INSTRUMENTS = ["Violão", "Canto", "Teclado", "Bateria"];
 
-export default function RegisterPage() {
+function HomeContent() {
   const router = useRouter();
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
-  const [me, setMe] = useState<{ name: string; role: string } | null>(null);
-  const [authChecked, setAuthChecked] = useState(false);
+  const { me, authChecked } = useAuth();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     fullName: "",
-    email: "",
+    nameFather: "",
+    nameMother: "",
     phone: "",
     address: "",
     instruments: [] as string[],
     available: true,
   });
 
-  useEffect(() => {
-    fetch("/api/auth/me")
-      .then(async (r) => {
-        if (r.ok) {
-          const data = await r.json();
-          setMe({ name: data.name, role: data.role });
-        }
-      })
-      .catch(() => {})
-      .finally(() => setAuthChecked(true));
-  }, []);
+  // Auth é carregado pelo AuthProvider
 
   useEffect(() => {
     try {
@@ -100,7 +92,8 @@ export default function RegisterPage() {
 
     if (
       !formData.fullName ||
-      !formData.email ||
+      !formData.nameFather ||
+      !formData.nameMother ||
       !formData.phone ||
       !formData.address
     ) {
@@ -130,7 +123,8 @@ export default function RegisterPage() {
       toast.success("Estudante registrado com sucesso!");
       setFormData({
         fullName: "",
-        email: "",
+        nameFather: "",
+        nameMother: "",
         phone: "",
         address: "",
         instruments: [],
@@ -156,54 +150,23 @@ export default function RegisterPage() {
         backgroundRepeat: "no-repeat",
       }}
     >
-      <div className="absolute inset-0 bg-gradient-to-br from-slate-900/70 via-slate-800/70 to-slate-900/70 pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-br from-gray-50/70 via-gray-100/70 to-gray-200/70 dark:from-slate-900/70 dark:via-slate-800/70 dark:to-slate-900/70 pointer-events-none" />
       <div className="relative z-10">
         {isAuthed && (
-          <header className="sticky top-0 z-40 bg-slate-900/80 backdrop-blur border-b border-slate-800">
-            <div className="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <button
-                  aria-label="Abrir menu"
-                  aria-controls="app-sidebar"
-                  aria-expanded={sidebarOpen}
-                  className="p-2 rounded hover:bg-slate-800 transition"
-                  onClick={() => setSidebarOpen((v) => !v)}
-                >
-                  <Menu className="h-5 w-5 text-slate-300" />
-                </button>
-                <nav aria-label="Breadcrumb" className="text-slate-400 text-sm">
-                  Dashboard <span className="mx-1">/</span> Adicionar Estudante
-                </nav>
-              </div>
-              <div className="flex items-center gap-4">
-                {me && (
-                  <div
-                    className="flex items-center gap-2"
-                    aria-label="Perfil do usuário"
-                  >
-                    <div
-                      className="h-8 w-8 rounded-full bg-blue-600 text-white flex items-center justify-center"
-                      aria-hidden
-                    >
-                      {me.name?.charAt(0).toUpperCase()}
-                    </div>
-                    <span className="text-slate-200 text-sm">{me.name}</span>
-                  </div>
-                )}
-                <Button
-                  variant="ghost"
-                  onClick={async () => {
-                    await fetch("/api/auth/logout", { method: "POST" });
-                    router.push("/login");
-                  }}
-                  aria-label="Sair"
-                  className="text-slate-300 hover:text-white"
-                >
-                  <LogOut className="h-4 w-4 mr-2" /> Logout
-                </Button>
-              </div>
-            </div>
-          </header>
+          <Topbar
+            sidebarOpen={sidebarOpen}
+            onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+            me={{
+              name: me?.name ?? "",
+              avatarUrl: me?.avatarUrl ?? undefined,
+              role: me?.role ?? "",
+            }}
+            onLogout={async () => {
+              await fetch("/api/auth/logout", { method: "POST" });
+              router.push("/login");
+            }}
+            breadcrumb={"Dashboard / Adicionar Estudante"}
+          />
         )}
 
         {isAuthed && sidebarOpen && (
@@ -234,7 +197,7 @@ export default function RegisterPage() {
                 if (touchStartX !== null && Math.abs(x - touchStartX) > 50)
                   setSidebarOpen(false);
               }}
-              className={`fixed md:static left-0 top-14 md:top-0 h-[calc(100vh-3.5rem)] md:h-auto w-64 transform transition-transform duration-300 ease-out ${
+              className={`fixed md:fixed left-0 top-14 md:top-14 h-[calc(100vh-3.5rem)] md:h-[calc(100vh-3.5rem)] w-64 transform transition-transform duration-300 ease-out ${
                 sidebarOpen ? "translate-x-0" : "-translate-x-full"
               } bg-slate-800 border-r border-slate-700 z-40`}
             >
@@ -280,18 +243,33 @@ export default function RegisterPage() {
                   </Link>
                 )}
                 <Link
-                  href="/dashboard"
+                  href="/attendance"
                   className={`flex items-center gap-2 px-3 py-2 rounded hover:bg-slate-700 transition ${
-                    pathname === "/dashboard"
+                    pathname === "/attendance"
                       ? "bg-slate-700 text-white"
                       : "text-slate-300"
                   }`}
                   onClick={() => setSidebarOpen(false)}
-                  aria-current={pathname === "/dashboard" ? "page" : undefined}
+                  aria-current={pathname === "/attendance" ? "page" : undefined}
                 >
                   <Home className="h-4 w-4" />
-                  <span>Dashboard</span>
+                  <span>Lista de Chamada</span>
                 </Link>
+                {me?.role !== "professor" && (
+                  <Link
+                    href="/dashboard"
+                    className={`flex items-center gap-2 px-3 py-2 rounded hover:bg-slate-700 transition ${
+                      pathname === "/dashboard"
+                        ? "bg-slate-700 text-white"
+                        : "text-slate-300"
+                    }`}
+                    onClick={() => setSidebarOpen(false)}
+                    aria-current={pathname === "/dashboard" ? "page" : undefined}
+                  >
+                    <Home className="h-4 w-4" />
+                    <span>Dashboard</span>
+                  </Link>
+                )}
               </nav>
             </aside>
           )}
@@ -313,24 +291,23 @@ export default function RegisterPage() {
                   />
                   <div className="flex items-center">
                     <Music className="h-10 w-10 text-blue-400 mr-3" />
-                    <h1 className="text-4xl font-bold text-white">
+                    <h1 className="text-4xl font-bold text-slate-900 dark:text-white">
                       Registro de Aluno
                     </h1>
                   </div>
                 </div>
-                <p className="text-slate-400 text-lg">
+                <p className="text-slate-800 dark:text-slate-400 text-lg">
                   Preencha o formulário abaixo para se inscrever na escola de
                   música
                 </p>
               </div>
-
-              <Card className="bg-slate-800 border-slate-700 shadow-2xl">
+              <Card className="bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700 shadow-2xl">
                 <form onSubmit={handleSubmit} className="p-8 space-y-6">
                   {/* Full Name */}
                   <div>
                     <Label
                       htmlFor="fullName"
-                      className="text-slate-200 text-sm font-medium"
+                      className="text-slate-900 dark:text-slate-200 text-sm font-medium"
                     >
                       Nome Completo
                     </Label>
@@ -345,21 +322,37 @@ export default function RegisterPage() {
                     />
                   </div>
 
-                  {/* Email */}
+                  {/* Pai e mãe */}
                   <div>
                     <Label
-                      htmlFor="email"
-                      className="text-slate-200 text-sm font-medium"
+                      htmlFor="nameFather"
+                      className="text-slate-900 dark:text-slate-200 text-sm font-medium"
                     >
-                      Email
+                      Nome do pai
                     </Label>
                     <Input
-                      id="email"
-                      type="email"
-                      placeholder="joao@email.com"
-                      value={formData.email}
+                      id="nameFather"
+                      placeholder="João da silva sauro"
+                      value={formData.nameFather}
                       onChange={(e) =>
-                        setFormData({ ...formData, email: e.target.value })
+                        setFormData({ ...formData, nameFather: e.target.value })
+                      }
+                      className="mt-2 bg-slate-700 border-slate-600 text-white placeholder:text-slate-500 focus:border-blue-400"
+                    />
+                  </div>
+                  <div>
+                    <Label
+                      htmlFor="nameMother"
+                      className="text-slate-900 dark:text-slate-200 text-sm font-medium"
+                    >
+                      Nome da mãe
+                    </Label>
+                    <Input
+                      id="nameMother"
+                      placeholder="Joana da silva sauro"
+                      value={formData.nameMother}
+                      onChange={(e) =>
+                        setFormData({ ...formData, nameMother: e.target.value })
                       }
                       className="mt-2 bg-slate-700 border-slate-600 text-white placeholder:text-slate-500 focus:border-blue-400"
                     />
@@ -369,7 +362,7 @@ export default function RegisterPage() {
                   <div>
                     <Label
                       htmlFor="phone"
-                      className="text-slate-200 text-sm font-medium"
+                      className="text-slate-900 dark:text-slate-200 text-sm font-medium"
                     >
                       WhatsApp
                     </Label>
@@ -387,7 +380,7 @@ export default function RegisterPage() {
                   <div>
                     <Label
                       htmlFor="address"
-                      className="text-slate-200 text-sm font-medium"
+                      className="text-slate-900 dark:text-slate-200 text-sm font-medium"
                     >
                       Endereço
                     </Label>
@@ -404,14 +397,26 @@ export default function RegisterPage() {
 
                   {/* Instruments */}
                   <div>
-                    <Label className="text-slate-200 text-sm font-medium">
+                    <Label className="text-slate-900 dark:text-slate-200 text-sm font-medium">
                       Instrumentos
                     </Label>
-                    <MultiSelect
-                      options={INSTRUMENTS}
-                      selected={formData.instruments}
-                      onChange={handleInstrumentsChange}
-                    />
+                    <select
+                      value={formData.instruments[0] ?? ""}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          instruments: e.target.value ? [e.target.value] : [],
+                        })
+                      }
+                      className="bg-slate-700 border border-slate-600 text-white mt-1 rounded p-2 w-full"
+                    >
+                      <option value="">Selecione um instrumento</option>
+                      {INSTRUMENTS.map((opt) => (
+                        <option key={opt} value={opt}>
+                          {opt}
+                        </option>
+                      ))}
+                    </select>
                   </div>
 
                   {/* Availability */}
@@ -429,7 +434,7 @@ export default function RegisterPage() {
                     />
                     <Label
                       htmlFor="available"
-                      className="text-slate-300 font-normal cursor-pointer"
+                      className="text-slate-900 dark:text-slate-300 font-normal cursor-pointer"
                     >
                       Disponível para aulas
                     </Label>
@@ -445,7 +450,7 @@ export default function RegisterPage() {
                   </Button>
                 </form>
               </Card>
-              <p className="text-center text-slate-400 p-5 text-sm mt-6">
+              <p className="text-center text-slate-800 dark:text-slate-400 p-5 text-sm mt-6">
                 Os dados serão enviados com segurança para o nosso banco de
                 dados.
               </p>
@@ -454,5 +459,15 @@ export default function RegisterPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function RegisterPage() {
+  return (
+    <AuthProvider>
+      <StatusProvider>
+        <HomeContent />
+      </StatusProvider>
+    </AuthProvider>
   );
 }

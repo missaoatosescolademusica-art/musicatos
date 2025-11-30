@@ -9,6 +9,7 @@ import { logout as logoutHandle } from "./helper/handles";
 import { StudentsProvider, useStudents } from "./contexts/students-context";
 import { UIProvider, useUI } from "./contexts/ui-context";
 import { AuthProvider, useAuth } from "./contexts/auth-context";
+import { StatusProvider } from "./contexts/status-context";
 
 import { StudentDialog } from "@/components/student-dialog";
 import Topbar from "./components/Topbar";
@@ -17,14 +18,20 @@ import SearchBar from "@/components/search/SearchBar";
 import DataTable from "@/components/shared/DataTable";
 import { ActionsDataTable } from "@/components/shared/ActionsDataTable";
 import { Student } from "../types/students";
+import FloatingAttendanceFAB from "@/components/attendance/FloatingAttendanceFAB";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import React from "react";
 
 export default function DashboardPage() {
   return (
     <AuthProvider>
       <UIProvider>
-        <StudentsProvider>
-          <DashboardContent />
-        </StudentsProvider>
+        <StatusProvider>
+          <StudentsProvider>
+            <DashboardContent />
+          </StudentsProvider>
+        </StatusProvider>
       </UIProvider>
     </AuthProvider>
   );
@@ -61,15 +68,22 @@ function DashboardContent() {
   }, [currentPage, searchQuery]);
 
   const isAdmin = me?.role === "admin";
+  const isProfessor = me?.role === "professor";
+  const [instrumentFilter, setInstrumentFilter] = React.useState("");
+  const [availableFilter, setAvailableFilter] = React.useState("");
 
   const logout = async () => logoutHandle((path) => router.push(path));
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+    <div className="min-h-screen bg-linear-to-br pb-10 from-gray-50 via-gray-100 to-gray-200 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 text-slate-900 dark:text-white">
       <Topbar
         sidebarOpen={sidebarOpen}
         onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
-        me={me}
+        me={{
+          name: me?.name ?? "",
+          avatarUrl: me?.avatarUrl ?? "",
+          role: me?.role ?? "",
+        }}
         onLogout={logout}
         breadcrumb={"Dashboard / Estudantes"}
       />
@@ -93,7 +107,7 @@ function DashboardContent() {
           sidebarOpen={sidebarOpen}
           onCloseSidebar={() => setSidebarOpen(false)}
           pathname={pathname}
-          isAdmin={isAdmin}
+          role={me?.role ?? ""}
           touchStartX={touchStartX}
           setTouchStartX={setTouchStartX}
         />
@@ -117,48 +131,111 @@ function DashboardContent() {
                 />
                 <div className="flex items-center">
                   <Users className="h-8 w-8 text-blue-400 mr-3" />
-                  <h1 className="text-3xl font-bold text-white">
-                    Painel Administrativo
+                  <h1 className="text-3xl font-bold text-slate-900 dark:text-white">
+                    {isProfessor
+                      ? "Painel do Professor"
+                      : "Painel Administrativo"}
                   </h1>
                 </div>
               </div>
-              <p className="text-slate-400 text-center">
+              <p className="text-slate-800 dark:text-slate-400 text-center">
                 Gerencie todos os alunos registrados
               </p>
             </div>
 
             <SearchBar placeholder="Buscar por ID do estudante..." />
 
+            {isProfessor && (
+              <div className="bg-slate-800 border border-slate-700 rounded p-4 grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+                <div>
+                  <Label className="text-slate-300">Instrumento</Label>
+                  <Input
+                    value={instrumentFilter}
+                    onChange={(e) => setInstrumentFilter(e.target.value)}
+                    className="bg-slate-700 border-slate-600 text-white mt-1"
+                    placeholder="Ex.: Violão"
+                  />
+                </div>
+                <div>
+                  <Label className="text-slate-300">Disponibilidade</Label>
+                  <select
+                    value={availableFilter}
+                    onChange={(e) => setAvailableFilter(e.target.value)}
+                    className="bg-slate-700 border border-slate-600 text-white mt-1 rounded p-2 w-full"
+                  >
+                    <option value="">Todos</option>
+                    <option value="true">Disponível</option>
+                    <option value="false">Indisponível</option>
+                  </select>
+                </div>
+              </div>
+            )}
             <DataTable
-              data={students}
+              data={
+                isProfessor
+                  ? students.filter((s) => {
+                      const iok = instrumentFilter
+                        ? s.instruments.some((i) =>
+                            i
+                              .toLowerCase()
+                              .includes(instrumentFilter.toLowerCase())
+                          )
+                        : true;
+                      const aok = availableFilter
+                        ? String(s.available) === availableFilter
+                        : true;
+                      return iok && aok;
+                    })
+                  : students
+              }
               loading={loading}
               currentPage={currentPage}
               totalPages={totalPages}
               pageSize={10}
               onPageChange={(p) => setCurrentPage(p)}
+              containerClassName="bg-slate-800 border-slate-700 overflow-hidden shadow-xl"
+              headerRowClassName="bg-slate-700"
+              bodyRowClassName="border-slate-700 hover:bg-slate-700 transition"
               columns={[
                 {
                   header: "ID",
+                  headerClassName:
+                    "text-slate-900 dark:text-slate-300 font-semibold",
                   cellClassName: "text-slate-300 font-mono text-sm",
                   render: (s: Student) => `${s.id.slice(0, 8)}...`,
                 },
                 {
                   header: "Nome",
+                  headerClassName:
+                    "text-slate-900 dark:text-slate-300 font-semibold",
                   cellClassName: "text-white font-medium",
                   render: (s: Student) => s.fullName,
                 },
                 {
-                  header: "Email",
+                  header: "Pai",
+                  headerClassName:
+                    "text-slate-900 dark:text-slate-300 font-semibold",
                   cellClassName: "text-slate-300",
-                  render: (s: Student) => s.email,
+                  render: (s: Student) => s.nameFather,
+                },
+                {
+                  header: "Mãe",
+                  headerClassName:
+                    "text-slate-900 dark:text-slate-300 font-semibold",
+                  cellClassName: "text-slate-300",
+                  render: (s: Student) => s.nameMother,
                 },
                 {
                   header: "WhatsApp",
+                  headerClassName:
+                    "text-slate-900 dark:text-slate-300 font-semibold",
                   cellClassName: "text-slate-300",
                   render: (s: Student) => s.phone,
                 },
                 {
                   header: "Instrumentos",
+                  headerClassName:
+                    "text-slate-900 dark:text-slate-300 font-semibold",
                   render: (s: Student) => (
                     <div className="flex gap-1 flex-wrap">
                       {s.instruments.map((instrument) => (
@@ -175,6 +252,8 @@ function DashboardContent() {
                 },
                 {
                   header: "Disponível",
+                  headerClassName:
+                    "text-slate-900 dark:text-slate-300 font-semibold",
                   render: (s: Student) => (
                     <Badge
                       className={
@@ -189,11 +268,14 @@ function DashboardContent() {
                 },
                 {
                   header: "Ações",
+                  headerClassName:
+                    "text-slate-900 dark:text-slate-300 font-semibold",
                   render: (s: Student) => (
                     <ActionsDataTable
                       viewStudent={() => viewStudent(s)}
                       editStudent={() => editStudent(s)}
                       deleteStudent={() => deleteStudent(s.id)}
+                      canDelete={isAdmin}
                       s={s}
                     />
                   ),
@@ -212,6 +294,7 @@ function DashboardContent() {
           />
         </main>
       </div>
+      <FloatingAttendanceFAB />
     </div>
   );
 }

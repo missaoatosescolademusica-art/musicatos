@@ -38,6 +38,7 @@ model User {
   id           String   @id @default(cuid())
   name         String
   email        String   @unique
+  phone        String?
   passwordHash String
   roleId       String
   role         Role     @relation(fields: [roleId], references: [id])
@@ -50,6 +51,7 @@ model User {
   avatar            UserAvatar?
   adminImpersonations  ImpersonationSession[] @relation("AdminImpersonations")
   targetImpersonations ImpersonationSession[] @relation("TargetImpersonations")
+  passwordResets   PasswordReset[]
 
   @@index([email])
 }
@@ -118,6 +120,19 @@ model ImpersonationSession {
   revoked   Boolean  @default(false)
 
   @@index([adminId])
+  @@index([userId])
+  @@index([expiresAt])
+}
+model PasswordReset {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+  code       String
+  attempts   Int      @default(0)
+  used       Boolean  @default(false)
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+
   @@index([userId])
   @@index([expiresAt])
 }

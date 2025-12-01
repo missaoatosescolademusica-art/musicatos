@@ -91,7 +91,15 @@ export async function handleSaveStudent(
 }
 
 export async function logout(routerPush: (path: string) => void) {
+  try {
+    const bearer = sessionStorage.getItem("auth_bearer")
+    if (bearer) {
+      sessionStorage.removeItem("auth_bearer")
+      console.info("ui_logout_bearer")
+      routerPush("/login")
+      return
+    }
+  } catch {}
   await fetch("/api/auth/logout", { method: "POST" })
   routerPush("/login")
 }
-

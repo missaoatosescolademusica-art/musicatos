@@ -72,6 +72,36 @@ function Sidebar({
             <span>Cadastrar Usuários</span>
           </Link>
         )}
+        {role === "admin" && (
+          <Link
+            href="/admin/users"
+            className={`flex items-center gap-2 px-3 py-2 rounded hover:bg-slate-700 transition ${
+              pathname === "/admin/users"
+                ? "bg-slate-700 text-white"
+                : "text-slate-300"
+            }`}
+            onClick={onCloseSidebar}
+            aria-current={pathname === "/admin/users" ? "page" : undefined}
+          >
+            <UserCog className="h-4 w-4" />
+            <span>Usuários</span>
+          </Link>
+        )}
+        {role === "admin" && (
+          <Link
+            href="/admin/sessions"
+            className={`flex items-center gap-2 px-3 py-2 rounded hover:bg-slate-700 transition ${
+              pathname === "/admin/sessions"
+                ? "bg-slate-700 text-white"
+                : "text-slate-300"
+            }`}
+            onClick={onCloseSidebar}
+            aria-current={pathname === "/admin/sessions" ? "page" : undefined}
+          >
+            <UserCog className="h-4 w-4" />
+            <span>Sessões</span>
+          </Link>
+        )}
         <Link
           href="/attendance"
           className={`flex items-center gap-2 px-3 py-2 rounded hover:bg-slate-700 transition ${

@@ -76,16 +76,31 @@ export async function POST(request: NextRequest) {
 
     const adminInvite = process.env.ADMIN_INVITE_SECRET;
     const headerInvite = request.headers.get("x-admin-invite") || "";
-    const finalRoleId =
-      roleName === "admin" && adminInvite && headerInvite === adminInvite
-        ? role.id
-        : (await prisma.role.findUnique({ where: { name: "user" } }))?.id ||
-          role.id;
+    let finalRoleId = role.id;
+    let decision = "requested";
+    if (roleName === "admin") {
+      if (adminInvite && headerInvite === adminInvite) {
+        finalRoleId = role.id;
+        decision = "admin_with_invite";
+      } else {
+        const userRole = await prisma.role.findUnique({
+          where: { name: "user" },
+        });
+        finalRoleId = userRole?.id || role.id;
+        decision = "admin_without_invite_fallback_user";
+      }
+    }
+    console.info("register_role_decision", { requested: roleName, decision });
 
     const passwordHash = await hashPassword(password);
     const user = await prisma.user.create({
       data: { name, email, passwordHash, roleId: finalRoleId },
       include: { role: true },
+    });
+    console.info("register_user_created", {
+      id: user.id,
+      email: user.email,
+      role: user.role.name,
     });
     const token = generateJwt({ sub: user.id, role: user.role.name });
     const res = NextResponse.redirect(new URL("/dashboard", request.url), {

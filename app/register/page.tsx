@@ -81,19 +81,37 @@ function RegisterPageContent() {
       });
       const ct = res.headers.get("content-type") || "";
       if (res.redirected) {
-        window.location.replace(res.url);
+        try {
+          localStorage.removeItem("user_avatar");
+          localStorage.removeItem("user_id");
+          localStorage.setItem("last_registered_email", email);
+        } catch {}
+        const next = me?.role === "admin" ? "/admin/users" : res.url;
+        window.location.replace(next);
         return;
       }
       if (ct.includes("application/json")) {
         const data = await res.json().catch(() => ({}));
         if (res.ok) {
-          window.location.replace("/dashboard");
+          try {
+            localStorage.removeItem("user_avatar");
+            localStorage.removeItem("user_id");
+            localStorage.setItem("last_registered_email", email);
+          } catch {}
+          const next = me?.role === "admin" ? "/admin/users" : "/dashboard";
+          window.location.replace(next);
         } else {
           toast.error(data.message || "Erro de validação");
         }
       } else {
         if (res.ok) {
-          window.location.replace("/dashboard");
+          try {
+            localStorage.removeItem("user_avatar");
+            localStorage.removeItem("user_id");
+            localStorage.setItem("last_registered_email", email);
+          } catch {}
+          const next = me?.role === "admin" ? "/admin/users" : "/dashboard";
+          window.location.replace(next);
         } else {
           toast.error("Erro de servidor");
         }

@@ -29,53 +29,71 @@ export async function comparePassword(password: string, hash: string) {
   return bcrypt.compare(password, hash)
 }
 
-export function generateJwt(payload: Record<string, any>) {
-  const secret = process.env.JWT_SECRET || "dev-secret"
-  return jwt.sign(payload, secret, { expiresIn: 3600 })
+export function generateJwt(payload: Record<string, any>, expiresInSec = 3600) {
+  const secret = process.env.JWT_SECRET || "dev-secret";
+  return jwt.sign(payload, secret, { expiresIn: expiresInSec });
 }
 
 function randomToken(length = 32) {
-  const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-  let out = ""
-  for (let i = 0; i < length; i++) out += chars[Math.floor(Math.random() * chars.length)]
-  return out
+  const chars =
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  let out = "";
+  for (let i = 0; i < length; i++)
+    out += chars[Math.floor(Math.random() * chars.length)];
+  return out;
 }
 
 export function issueCsrfToken() {
-  return randomToken(48)
+  return randomToken(48);
 }
 
 export function verifyOrigin(req: Request) {
-  const origin = req.headers.get("origin") || ""
-  const host = req.headers.get("host") || ""
-  return origin.includes(host)
+  const origin = req.headers.get("origin") || "";
+  const host = req.headers.get("host") || "";
+  return origin.includes(host);
 }
 
 export function verifyCsrf(req: Request, csrfCookie: string | undefined) {
-  const header = req.headers.get("x-csrf-token") || ""
-  return csrfCookie && header && csrfCookie === header
+  const header = req.headers.get("x-csrf-token") || "";
+  return csrfCookie && header && csrfCookie === header;
 }
 
-export async function getAuthInfo(req: NextRequest | Request): Promise<{ userId: string; role: string } | null> {
-  let token = ""
-  const anyReq = req as any
+export async function getAuthInfo(
+  req: NextRequest | Request
+): Promise<{ userId: string; role: string } | null> {
+  let token = "";
+  const anyReq = req as any;
   try {
-    const c = anyReq.cookies?.get?.("auth")?.value
-    if (c) token = c
+    const authz = (
+      req.headers.get("authorization") ||
+      req.headers.get("Authorization") ||
+      ""
+    ).trim();
+    if (authz.toLowerCase().startsWith("bearer ")) token = authz.slice(7);
+    const c = anyReq.cookies?.get?.("auth")?.value;
+    if (!token && c) token = c;
   } catch {}
   if (!token) {
-    const cookies = req.headers.get("cookie") || ""
-    const m = /(?:^|;\s*)auth=([^;]+)/.exec(cookies)
-    token = m?.[1] || ""
+    const cookies = req.headers.get("cookie") || "";
+    const m = /(?:^|;\s*)auth=([^;]+)/.exec(cookies);
+    token = token || m?.[1] || "";
   }
-  if (!token) return null
-  const secret = new TextEncoder().encode(process.env.JWT_SECRET || "dev-secret")
+  if (!token) return null;
+  const secret = new TextEncoder().encode(
+    process.env.JWT_SECRET || "dev-secret"
+  );
   try {
-    const { payload } = await jwtVerify(token, secret)
-    const userId = String(payload.sub || "")
-    const role = String((payload as any).role || "")
-    return userId ? { userId, role } : null
+    const { payload } = await jwtVerify(token, secret);
+    const userId = String(payload.sub || "");
+    const role = String((payload as any).role || "");
+    const jti = (payload as any).jti as string | undefined;
+    try {
+      const { isRevoked } = await import("@/lib/sessions");
+      const revoked = await isRevoked(jti);
+      if (revoked) return null;
+    } catch {}
+    return userId ? { userId, role } : null;
   } catch {
-    return null
+    return null;
   }
 }

@@ -1,20 +1,14 @@
 import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/db"
-import { jwtVerify } from "jose"
+import { getAuthInfo } from "@/lib/auth"
 import fs from "fs";
 import path from "path";
 
 export async function GET(request: NextRequest) {
   try {
-    const token = request.cookies.get("auth")?.value
-
-    if (!token) return NextResponse.json({ message: "Não autenticado" }, { status: 401 })
-    
-    const secret = new TextEncoder().encode(process.env.JWT_SECRET || "dev-secret")
-    const { payload } = await jwtVerify(token, secret)
-    const id = String(payload.sub || "")
-    
-    if (!id) return NextResponse.json({ message: "Token inválido" }, { status: 401 })
+    const auth = await getAuthInfo(request)
+    if (!auth) return NextResponse.json({ message: "Não autenticado" }, { status: 401 })
+    const id = auth.userId
     
     const user = await prisma.user.findUnique({ where: { id }, include: { role: true } })
 
@@ -40,13 +34,15 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    console.info("me_auth_ok", { id: user.id, role: user.role.name })
     return NextResponse.json({
       id: user.id,
       name: user.name,
       role: user.role.name,
       avatarUrl,
     });
-  } catch {
+  } catch (e) {
+    console.error("me_auth_error", e)
     return NextResponse.json({ message: "Token inválido" }, { status: 401 })
   }
 }

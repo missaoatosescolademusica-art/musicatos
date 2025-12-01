@@ -48,6 +48,8 @@ model User {
   auditLogs         AuditLog[]
   markedAttendances Attendance[] @relation("MarkedBy")
   avatar            UserAvatar?
+  adminImpersonations  ImpersonationSession[] @relation("AdminImpersonations")
+  targetImpersonations ImpersonationSession[] @relation("TargetImpersonations")
 
   @@index([email])
 }
@@ -102,4 +104,20 @@ model AuditLog {
   createdAt DateTime    @default(now())
 
   @@index([entity, entityId])
+}
+
+model ImpersonationSession {
+  jti       String   @id
+  adminId   String
+  admin     User     @relation("AdminImpersonations", fields: [adminId], references: [id])
+  userId    String
+  user      User     @relation("TargetImpersonations", fields: [userId], references: [id])
+  role      String
+  issuedAt  DateTime @default(now())
+  expiresAt DateTime
+  revoked   Boolean  @default(false)
+
+  @@index([adminId])
+  @@index([userId])
+  @@index([expiresAt])
 }

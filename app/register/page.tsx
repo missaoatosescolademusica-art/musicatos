@@ -146,7 +146,7 @@ function RegisterPageContent() {
             sidebarOpen={sidebarOpen}
             onCloseSidebar={() => setSidebarOpen(false)}
             pathname={pathname}
-            isAdmin={me?.role === "admin"}
+            role={me?.role ?? ""}
             touchStartX={touchStartX}
             setTouchStartX={setTouchStartX}
           />

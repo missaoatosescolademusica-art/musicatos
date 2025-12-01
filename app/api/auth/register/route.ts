@@ -64,7 +64,12 @@ export async function POST(request: NextRequest) {
       role = await prisma.role.create({
         data: {
           name: roleName,
-          description: roleName === "admin" ? "Administrador" : "Usuário",
+          description:
+            roleName === "admin"
+              ? "Administrador"
+              : roleName === "professor"
+              ? "Professor"
+              : "Usuário",
         },
       });
     }

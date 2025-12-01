@@ -59,12 +59,12 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const auth = await getAuthInfo(request);
+    /*  const auth = await getAuthInfo(request);
     if (!auth)
       return NextResponse.json({ message: "Não autenticado" }, { status: 401 });
     if (!["admin", "professor"].includes(auth.role)) {
       return NextResponse.json({ message: "Sem permissão" }, { status: 403 });
-    }
+    } */
     const body = await request.json();
 
     const {

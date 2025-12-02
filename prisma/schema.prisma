@@ -128,6 +128,7 @@ model PasswordReset {
   userId     String
   user       User     @relation(fields: [userId], references: [id])
   code       String
+  token      String?
   attempts   Int      @default(0)
   used       Boolean  @default(false)
   expiresAt  DateTime
@@ -135,4 +136,5 @@ model PasswordReset {
 
   @@index([userId])
   @@index([expiresAt])
+  @@unique([token])
 }

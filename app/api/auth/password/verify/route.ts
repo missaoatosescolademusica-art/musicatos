@@ -10,7 +10,9 @@ export async function POST(request: NextRequest) {
     const { emailOrPhone, code } = await request.json().catch(() => ({ emailOrPhone: "", code: "" }))
     const value = String(emailOrPhone || "").trim()
     const isPhone = /^\+?[0-9]{10,15}$/.test(value)
-    const user = isPhone ? await prisma.user.findFirst({ where: { phone: value } }) : await prisma.user.findUnique({ where: { email: value } })
+    const user = isPhone
+      ? await prisma.user.findFirst({ where: { phone: value }, orderBy: { createdAt: "desc" } })
+      : await prisma.user.findUnique({ where: { email: value } })
     if (!user) return NextResponse.json({ message: "Conta não encontrada" }, { status: 404 })
     const rec = await prisma.passwordReset.findFirst({ where: { userId: user.id, used: false }, orderBy: { createdAt: "desc" } })
     if (!rec) return NextResponse.json({ message: "Código não encontrado" }, { status: 404 })

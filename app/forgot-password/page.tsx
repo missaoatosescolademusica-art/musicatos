@@ -1,70 +1,100 @@
 "use client"
-import React from "react"
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
+import React, { useEffect, useState } from "react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { validateEmail } from "@/lib/auth";
 
 export default function ForgotPasswordPage() {
-  const [step, setStep] = useState<1|2|3>(1)
-  const [emailOrPhone, setEmailOrPhone] = useState("")
-  const [code, setCode] = useState("")
-  const [newPassword, setNewPassword] = useState("")
-  const [token, setToken] = useState("")
-  const [locale, setLocale] = useState("pt")
-  const router = useRouter()
+  const [email, setEmail] = useState("");
+  const [locale, setLocale] = useState("pt");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
 
-  const sendCode = async () => {
-    const csrf = document.cookie.split(";").find((c) => c.trim().startsWith("csrfToken="))?.split("=")[1] || ""
-    const res = await fetch("/api/auth/password/request", { method: "POST", headers: { "Content-Type": "application/json", "x-csrf-token": csrf }, body: JSON.stringify({ emailOrPhone, locale }) })
-    const json = await res.json().catch(() => ({}))
-    if (!res.ok) alert(json.message || "Erro")
-    else setStep(2)
-  }
-  const verifyCode = async () => {
-    const csrf = document.cookie.split(";").find((c) => c.trim().startsWith("csrfToken="))?.split("=")[1] || ""
-    const res = await fetch("/api/auth/password/verify", { method: "POST", headers: { "Content-Type": "application/json", "x-csrf-token": csrf }, body: JSON.stringify({ emailOrPhone, code }) })
-    const json = await res.json().catch(() => ({}))
-    if (!res.ok) alert(json.message || "Erro")
-    else { setToken(String(json.token||"")); setStep(3) }
-  }
-  const resetPassword = async () => {
-    const csrf = document.cookie.split(";").find((c) => c.trim().startsWith("csrfToken="))?.split("=")[1] || ""
-    const res = await fetch("/api/auth/password/reset", { method: "POST", headers: { "Content-Type": "application/json", "x-csrf-token": csrf }, body: JSON.stringify({ token, newPassword }) })
-    const json = await res.json().catch(() => ({}))
-    if (!res.ok) alert(json.message || "Erro")
-    else router.replace("/login")
-  }
+  useEffect(() => {
+    fetch("/api/auth/csrf").catch(() => {});
+  }, []);
+
+  const submit = async () => {
+    setError("");
+    setSuccess(false);
+    if (!validateEmail(email)) {
+      setError("Email inválido");
+      return;
+    }
+    setLoading(true);
+    try {
+      const csrf =
+        document.cookie
+          .split(";")
+          .find((c) => c.trim().startsWith("csrfToken="))
+          ?.split("=")[1] || "";
+      const res = await fetch("/api/auth/password/email/request", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-csrf-token": csrf },
+        body: JSON.stringify({ email, locale }),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) setError(json.message || "Erro");
+      else setSuccess(true);
+    } catch (e: any) {
+      setError(e?.message || "Erro");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 px-4">
       <div className="w-full max-w-md bg-slate-800 border border-slate-700 rounded p-6">
-        <h1 className="text-xl font-semibold text-slate-200">Esqueci minha senha</h1>
-        <div className="mt-4 flex gap-2">
-          <select value={locale} onChange={(e)=>setLocale(e.target.value)} className="bg-slate-700 border-slate-600 text-white rounded p-2">
-            <option value="pt">Português</option>
-            <option value="en">English</option>
-          </select>
+        <h1 className="text-xl font-semibold text-slate-200">
+          Esqueci minha senha
+        </h1>
+        <p className="text-slate-400">
+          Informe seu email para receber o link de redefinição.
+        </p>
+        <div className="mt-4 grid gap-3">
+          <label className="text-slate-300" htmlFor="email">
+            Email
+          </label>
+          <Input
+            id="email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="seu@email.com"
+            className="bg-slate-700 border-slate-600 text-white"
+            aria-label="Email"
+          />
+          <div className="flex items-center gap-2">
+            <select
+              value={locale}
+              onChange={(e) => setLocale(e.target.value)}
+              className="bg-slate-700 border-slate-600 text-white rounded p-2"
+            >
+              <option value="pt">Português</option>
+              <option value="en">English</option>
+            </select>
+            <Button
+              onClick={submit}
+              disabled={loading}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              {loading ? "Enviando..." : "Enviar link"}
+            </Button>
+          </div>
+          {error && (
+            <div role="alert" className="text-red-400" aria-live="polite">
+              {error}
+            </div>
+          )}
+          {success && (
+            <div role="status" className="text-green-400" aria-live="polite">
+              Verifique seu email e siga o link enviado.
+            </div>
+          )}
         </div>
-        {step===1 && (
-          <div className="mt-4 grid gap-3">
-            <Input value={emailOrPhone} onChange={(e)=>setEmailOrPhone(e.target.value)} placeholder="Email ou telefone (+5511999999999)" className="bg-slate-700 border-slate-600 text-white" aria-label="Email ou telefone" />
-            <Button onClick={sendCode} className="bg-blue-600 hover:bg-blue-700">Enviar código de verificação</Button>
-          </div>
-        )}
-        {step===2 && (
-          <div className="mt-4 grid gap-3">
-            <Input value={code} onChange={(e)=>setCode(e.target.value)} placeholder="Código de 6 dígitos" className="bg-slate-700 border-slate-600 text-white" aria-label="Código de verificação" />
-            <Button onClick={verifyCode} className="bg-blue-600 hover:bg-blue-700">Validar código</Button>
-          </div>
-        )}
-        {step===3 && (
-          <div className="mt-4 grid gap-3">
-            <Input type="password" value={newPassword} onChange={(e)=>setNewPassword(e.target.value)} placeholder="Nova senha" className="bg-slate-700 border-slate-600 text-white" aria-label="Nova senha" />
-            <Button onClick={resetPassword} className="bg-blue-600 hover:bg-blue-700">Redefinir senha</Button>
-          </div>
-        )}
       </div>
     </div>
-  )
+  );
 }

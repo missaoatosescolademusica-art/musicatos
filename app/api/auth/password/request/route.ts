@@ -16,7 +16,12 @@ export async function POST(request: NextRequest) {
     const value = String(emailOrPhone || "").trim()
     if (!value) return NextResponse.json({ message: "Informe email ou telefone" }, { status: 400 })
     const isPhone = /^\+?[0-9]{10,15}$/.test(value)
-    const user = isPhone ? await prisma.user.findFirst({ where: { phone: value } }) : await prisma.user.findUnique({ where: { email: value } })
+    const user = isPhone
+      ? await prisma.user.findFirst({
+          where: { phone: value },
+          orderBy: { createdAt: "desc" },
+        })
+      : await prisma.user.findUnique({ where: { email: value } });
     if (!user) return NextResponse.json({ message: "Conta não encontrada" }, { status: 404 })
     const code = code6()
     const expiresAt = new Date(Date.now() + 15 * 60 * 1000)

@@ -13,4 +13,4 @@ if (!fs.existsSync(configDir)) {
 
 fs.writeFileSync(path.join(configDir, "instruments.json"), JSON.stringify({ instruments }, null, 2))
 
-console.log("✓ Instruments seed created successfully")
+console.info("✓ Instruments seed created successfully");

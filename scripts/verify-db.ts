@@ -12,23 +12,17 @@ const sql = neon(databaseUrl)
 
 async function verifyDatabase() {
   try {
-    console.log("[v0] Checking database schema...")
+    console.info("[v0] Checking database schema...");
 
-    const tables = await sql(`
-      SELECT table_name 
-      FROM information_schema.tables 
-      WHERE table_schema = 'public'
-    `)
+    const tables =
+      await sql`SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'`;
 
-    console.log("[v0] Tables in database:", tables)
+    console.info("[v0] Tables in database:", tables);
 
-    const studentTable = await sql(`
-      SELECT column_name, data_type 
-      FROM information_schema.columns 
-      WHERE table_name = 'Student'
-    `)
+    const studentTable =
+      await sql`SELECT column_name, data_type FROM information_schema.columns WHERE table_name = 'Student'`;
 
-    console.log("[v0] Student table columns:", studentTable)
+    console.info("[v0] Student table columns:", studentTable);
   } catch (error) {
     console.error("[v0] Database verification failed:", error)
   }

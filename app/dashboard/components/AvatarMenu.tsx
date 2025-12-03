@@ -99,6 +99,7 @@ export default function AvatarMenu({ name, avatarUrl, onLogout }: Props) {
         <button
           aria-label="Abrir menu do usuário"
           className="relative inline-flex items-center justify-center rounded-full size-10 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
+          suppressHydrationWarning
         >
           <AvatarStatus status={status}>
             <AvatarPrimitive.Root className="inline-flex h-10 w-10 select-none items-center justify-center overflow-hidden rounded-full align-middle border border-slate-600" key={avatar || "fallback"}>

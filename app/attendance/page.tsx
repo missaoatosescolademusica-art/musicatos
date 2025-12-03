@@ -5,14 +5,9 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { useRouter } from "next/navigation"
-import { toast } from "sonner"
-import Topbar from "@/app/dashboard/components/Topbar"
-import Sidebar from "@/app/dashboard/components/Sidebar"
-import { AuthProvider, useAuth } from "@/app/dashboard/contexts/auth-context"
-import { UIProvider, useUI } from "@/app/dashboard/contexts/ui-context"
-import { usePathname } from "next/navigation"
-import { logout as logoutHandle } from "@/app/dashboard/helper/handles"
+
+import { toast } from "sonner";
+
 import FloatingAttendanceFAB from "@/components/attendance/FloatingAttendanceFAB"
 
 type AttendanceItem = {
@@ -23,20 +18,11 @@ type AttendanceItem = {
 }
 
 export default function AttendancePage() {
-  return (
-    <AuthProvider>
-      <UIProvider>
-        <AttendanceContent />
-      </UIProvider>
-    </AuthProvider>
-  )
+  return <AttendanceContent />;
 }
 
 function AttendanceContent() {
-  const router = useRouter()
-  const pathname = usePathname()
-  const { me } = useAuth()
-  const { sidebarOpen, setSidebarOpen, touchStartX, setTouchStartX } = useUI()
+
   const [loading, setLoading] = useState(false)
   const [data, setData] = useState<AttendanceItem[]>([])
   const [page, setPage] = useState(1)
@@ -179,115 +165,114 @@ function AttendanceContent() {
   }, [data])
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 text-slate-900 dark:text-white">
-      {me && (
-        <Topbar
-          sidebarOpen={sidebarOpen}
-          onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
-          me={{ name: me?.name ?? "", avatarUrl: me?.avatarUrl ?? "", role: me?.role ?? "" }}
-          onLogout={async () => logoutHandle((path) => router.push(path))}
-          breadcrumb={"Lista de Chamada"}
-        />
-      )}
-
-      {me && sidebarOpen && (
-        <div
-          aria-hidden="true"
-          onClick={() => setSidebarOpen(false)}
-          onTouchStart={(e) => setTouchStartX(e.touches[0]?.clientX ?? null)}
-          onTouchMove={(e) => {
-            const x = e.touches[0]?.clientX ?? 0
-            if (touchStartX !== null && Math.abs(x - touchStartX) > 50) setSidebarOpen(false)
-          }}
-          className="fixed inset-0 top-14 md:hidden bg-black/50 z-30 transition-opacity duration-300"
-        />
-      )}
-
-      <div className="flex">
-        {me && (
-          <Sidebar
-            sidebarOpen={sidebarOpen}
-            onCloseSidebar={() => setSidebarOpen(false)}
-            pathname={pathname}
-            role={me?.role ?? ""}
-            touchStartX={touchStartX}
-            setTouchStartX={setTouchStartX}
-          />
-        )}
-
-        <main className={`flex-1 w-full min-h-[calc(100vh-3.5rem)] px-4 ${me && sidebarOpen ? "md:pl-64" : ""}`}>
-          <div className="w-full max-w-5xl mx-auto space-y-4 py-4">
-            <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Lista de Chamada</h1>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-              <div className="bg-slate-800 border border-slate-700 rounded p-4">
-                <p className="text-slate-400 text-sm">Presente</p>
-                <p className="text-3xl font-bold text-green-400">{totals.present}</p>
-              </div>
-              <div className="bg-slate-800 border border-slate-700 rounded p-4">
-                <p className="text-slate-400 text-sm">Ausente</p>
-                <p className="text-3xl font-bold text-red-400">{totals.absent}</p>
-              </div>
-              <div className="bg-slate-800 border border-slate-700 rounded p-4">
-                <p className="text-slate-400 text-sm">Atraso</p>
-                <p className="text-3xl font-bold text-yellow-400">{totals.late}</p>
-              </div>
-              <div className="bg-slate-800 border border-slate-700 rounded p-4">
-                <p className="text-slate-400 text-sm">Sem marcação</p>
-                <p className="text-3xl font-bold text-slate-300">{totals.unmarked}</p>
-              </div>
-            </div>
-            <div className="bg-slate-800 border border-slate-700 rounded p-4 grid grid-cols-1 md:grid-cols-4 gap-3">
-              <div>
-                <Label className="text-slate-300">Busca</Label>
-                <Input value={q} onChange={(e) => setQ(e.target.value)} className="bg-slate-700 border-slate-600 text-white mt-1" placeholder="Nome ou email" />
-              </div>
-              <div>
-                <Label className="text-slate-300">Status</Label>
-                <select value={status} onChange={(e) => setStatus(e.target.value)} className="bg-slate-700 border border-slate-600 text-white mt-1 rounded p-2 w-full">
-                  <option value="">Todos</option>
-                  <option value="PRESENT">Presente</option>
-                  <option value="ABSENT">Ausente</option>
-                  <option value="LATE">Atraso</option>
-                  <option value="UNMARKED">Sem marcação</option>
-                </select>
-              </div>
-              <div>
-                <Label className="text-slate-300">Data</Label>
-                <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="bg-slate-700 border-slate-600 text-white mt-1" />
-              </div>
-              <div>
-                <Label className="text-slate-300">Instrumento</Label>
-                <Input value={instrument} onChange={(e) => setInstrument(e.target.value)} className="bg-slate-700 border-slate-600 text-white mt-1" placeholder="Ex.: Violão" />
-              </div>
-              <div>
-                <Label className="text-slate-300">Disponível</Label>
-                <select value={available} onChange={(e) => setAvailable(e.target.value)} className="bg-slate-700 border border-slate-600 text-white mt-1 rounded p-2 w-full">
-                  <option value="">Todos</option>
-                  <option value="true">Sim</option>
-                  <option value="false">Não</option>
-                </select>
-              </div>
-              <div className="flex items-end">
-                <Button onClick={() => fetchList(1)} className="bg-blue-600 hover:bg-blue-700">Aplicar Filtros</Button>
-              </div>
-            </div>
-
-            <DataTable
-              data={data}
-              columns={columns}
-              loading={loading}
-              currentPage={page}
-              totalPages={totalPages}
-              pageSize={10}
-              onPageChange={(p) => { setPage(p); fetchList(p) }}
-              containerClassName="bg-slate-800 border-slate-700 overflow-hidden shadow-xl"
-              headerRowClassName="bg-slate-700"
-              bodyRowClassName="border-slate-700 hover:bg-slate-700 transition"
-            />
-            <FloatingAttendanceFAB />
+    <main className="w-full min-h-[calc(100vh-3.5rem)] px-4">
+      <div className="w-full max-w-5xl mx-auto space-y-4 py-4">
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
+          Lista de Chamada
+        </h1>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <div className="bg-slate-800 border border-slate-700 rounded p-4">
+            <p className="text-slate-400 text-sm">Presente</p>
+            <p className="text-3xl font-bold text-green-400">
+              {totals.present}
+            </p>
           </div>
-        </main>
+          <div className="bg-slate-800 border border-slate-700 rounded p-4">
+            <p className="text-slate-400 text-sm">Ausente</p>
+            <p className="text-3xl font-bold text-red-400">{totals.absent}</p>
+          </div>
+          <div className="bg-slate-800 border border-slate-700 rounded p-4">
+            <p className="text-slate-400 text-sm">Atraso</p>
+            <p className="text-3xl font-bold text-yellow-400">{totals.late}</p>
+          </div>
+          <div className="bg-slate-800 border border-slate-700 rounded p-4">
+            <p className="text-slate-400 text-sm">Sem marcação</p>
+            <p className="text-3xl font-bold text-slate-300">
+              {totals.unmarked}
+            </p>
+          </div>
+        </div>
+        <div className="bg-slate-800 border border-slate-700 rounded p-4 grid grid-cols-1 md:grid-cols-4 gap-3">
+          <div>
+            <Label className="text-slate-300">Busca</Label>
+            <Input
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              className="bg-slate-700 border-slate-600 text-white mt-1"
+              placeholder="Nome ou email"
+            />
+          </div>
+          <div>
+            <Label className="text-slate-300">Status</Label>
+            <select
+              value={status}
+              onChange={(e) => setStatus(e.target.value)}
+              className="bg-slate-700 border border-slate-600 text-white mt-1 rounded p-2 w-full"
+            >
+              <option value="">Todos</option>
+              <option value="PRESENT">Presente</option>
+              <option value="ABSENT">Ausente</option>
+              <option value="LATE">Atraso</option>
+              <option value="UNMARKED">Sem marcação</option>
+            </select>
+          </div>
+          <div>
+            <Label className="text-slate-300">Data</Label>
+            <Input
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              className="bg-slate-700 border-slate-600 text-white mt-1"
+            />
+          </div>
+          <div>
+            <Label className="text-slate-300">Instrumento</Label>
+            <Input
+              value={instrument}
+              onChange={(e) => setInstrument(e.target.value)}
+              className="bg-slate-700 border-slate-600 text-white mt-1"
+              placeholder="Ex.: Violão"
+            />
+          </div>
+          <div>
+            <Label className="text-slate-300">Disponível</Label>
+            <select
+              value={available}
+              onChange={(e) => setAvailable(e.target.value)}
+              className="bg-slate-700 border border-slate-600 text-white mt-1 rounded p-2 w-full"
+            >
+              <option value="">Todos</option>
+              <option value="true">Sim</option>
+              <option value="false">Não</option>
+            </select>
+          </div>
+          <div className="flex items-end">
+            <Button
+              onClick={() => fetchList(1)}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              Aplicar Filtros
+            </Button>
+          </div>
+        </div>
+
+        <DataTable
+          data={data}
+          columns={columns}
+          loading={loading}
+          currentPage={page}
+          totalPages={totalPages}
+          pageSize={10}
+          onPageChange={(p) => {
+            setPage(p);
+            fetchList(p);
+          }}
+          containerClassName="bg-slate-800 border-slate-700 overflow-hidden shadow-xl"
+          headerRowClassName="bg-slate-700"
+          bodyRowClassName="border-slate-700 hover:bg-slate-700 transition"
+        />
+        <FloatingAttendanceFAB />
       </div>
-    </div>
-  )
+    </main>
+  );
 }

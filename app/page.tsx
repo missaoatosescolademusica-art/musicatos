@@ -1,29 +1,24 @@
-"use client"
+"use client";
+import type React from "react";
+import { useEffect, useState } from "react";
 
-import type React from "react"
-
-import { useEffect, useState } from "react"
-import Link from "next/link"
-import { usePathname, useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
-import { Music, UserPlus, UserCog, Home } from "lucide-react";
+import { Music } from "lucide-react";
 import Image from "next/image";
-import Topbar from "@/app/dashboard/components/Topbar";
+
 import { AuthProvider, useAuth } from "@/app/dashboard/contexts/auth-context";
 import { StatusProvider } from "@/app/dashboard/contexts/status-context";
 
 const INSTRUMENTS = ["Violão", "Canto", "Teclado", "Bateria"];
 
 function HomeContent() {
-  const router = useRouter();
-  const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [touchStartX, setTouchStartX] = useState<number | null>(null);
+
   const { me, authChecked } = useAuth();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -140,7 +135,7 @@ function HomeContent() {
 
   return (
     <div
-      className="min-h-screen relative"
+      className="min-h-screen relative w-full"
       style={{
         backgroundImage: "url('/fundo-da-musica-moderna.png')",
         backgroundSize: "cover",
@@ -150,134 +145,13 @@ function HomeContent() {
     >
       <div className="absolute inset-0 bg-gradient-to-br from-gray-50/70 via-gray-100/70 to-gray-200/70 dark:from-slate-900/70 dark:via-slate-800/70 dark:to-slate-900/70 pointer-events-none" />
       <div className="relative z-10">
-        {isAuthed && (
-          <Topbar
-            sidebarOpen={sidebarOpen}
-            onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
-            me={{
-              name: me?.name ?? "",
-              avatarUrl: me?.avatarUrl ?? undefined,
-              role: me?.role ?? "",
-            }}
-            onLogout={async () => {
-              await fetch("/api/auth/logout", { method: "POST" });
-              router.push("/login");
-            }}
-            breadcrumb={"Dashboard / Adicionar Estudante"}
-          />
-        )}
-
-        {isAuthed && sidebarOpen && (
-          <div
-            aria-hidden="true"
-            onClick={() => setSidebarOpen(false)}
-            onTouchStart={(e) => setTouchStartX(e.touches[0]?.clientX ?? null)}
-            onTouchMove={(e) => {
-              const x = e.touches[0]?.clientX ?? 0;
-              if (touchStartX !== null && Math.abs(x - touchStartX) > 50)
-                setSidebarOpen(false);
-            }}
-            className="fixed inset-0 top-14 md:hidden bg-black/50 z-30 transition-opacity duration-300"
-          />
-        )}
-
         <div className="flex">
-          {isAuthed && (
-            <aside
-              id="app-sidebar"
-              aria-label="Navegação lateral"
-              tabIndex={0}
-              onTouchStart={(e) =>
-                setTouchStartX(e.touches[0]?.clientX ?? null)
-              }
-              onTouchMove={(e) => {
-                const x = e.touches[0]?.clientX ?? 0;
-                if (touchStartX !== null && Math.abs(x - touchStartX) > 50)
-                  setSidebarOpen(false);
-              }}
-              className={`fixed md:fixed left-0 top-14 md:top-14 h-[calc(100vh-3.5rem)] md:h-[calc(100vh-3.5rem)] w-64 transform transition-transform duration-300 ease-out ${
-                sidebarOpen ? "translate-x-0" : "-translate-x-full"
-              } bg-slate-800 border-r border-slate-700 z-40`}
-            >
-              <div className="p-4 border-b border-slate-700 flex items-center gap-2">
-                <Image
-                  src="/Logo.jpg"
-                  alt="Logo"
-                  width={36}
-                  height={36}
-                  className="rounded"
-                />
-                <span className="text-slate-200 font-semibold">
-                  Missão Atos
-                </span>
-              </div>
-              <nav className="p-2 space-y-1">
-                <Link
-                  href="/"
-                  className={`flex items-center gap-2 px-3 py-2 rounded hover:bg-slate-700 transition ${
-                    pathname === "/"
-                      ? "bg-slate-700 text-white"
-                      : "text-slate-300"
-                  }`}
-                  onClick={() => setSidebarOpen(false)}
-                  aria-current={pathname === "/" ? "page" : undefined}
-                >
-                  <UserPlus className="h-4 w-4" />
-                  <span>Adicionar Estudante</span>
-                </Link>
-                {me?.role === "admin" && (
-                  <Link
-                    href="/register"
-                    className={`flex items-center gap-2 px-3 py-2 rounded hover:bg-slate-700 transition ${
-                      pathname === "/register"
-                        ? "bg-slate-700 text-white"
-                        : "text-slate-300"
-                    }`}
-                    onClick={() => setSidebarOpen(false)}
-                    aria-current={pathname === "/register" ? "page" : undefined}
-                  >
-                    <UserCog className="h-4 w-4" />
-                    <span>Cadastrar Usuários</span>
-                  </Link>
-                )}
-                <Link
-                  href="/attendance"
-                  className={`flex items-center gap-2 px-3 py-2 rounded hover:bg-slate-700 transition ${
-                    pathname === "/attendance"
-                      ? "bg-slate-700 text-white"
-                      : "text-slate-300"
-                  }`}
-                  onClick={() => setSidebarOpen(false)}
-                  aria-current={pathname === "/attendance" ? "page" : undefined}
-                >
-                  <Home className="h-4 w-4" />
-                  <span>Lista de Chamada</span>
-                </Link>
-                {me?.role !== "professor" && (
-                  <Link
-                    href="/dashboard"
-                    className={`flex items-center gap-2 px-3 py-2 rounded hover:bg-slate-700 transition ${
-                      pathname === "/dashboard"
-                        ? "bg-slate-700 text-white"
-                        : "text-slate-300"
-                    }`}
-                    onClick={() => setSidebarOpen(false)}
-                    aria-current={pathname === "/dashboard" ? "page" : undefined}
-                  >
-                    <Home className="h-4 w-4" />
-                    <span>Dashboard</span>
-                  </Link>
-                )}
-              </nav>
-            </aside>
-          )}
-
           <main
             className={`flex-1 w-full min-h-[calc(100vh-3.5rem)] flex items-center justify-center px-4 ${
               isAuthed && sidebarOpen ? "md:pl-64" : ""
             }`}
           >
-            <div className="w-full max-w-2xl mx-auto">
+            <div className="md:w-full max-w-2xl mx-auto">
               <div className="text-center mb-12">
                 <div className="flex flex-col items-center justify-center mb-4">
                   <Image

@@ -19,8 +19,8 @@ export default function AvatarStatus({
   borderPx?: number
   children: React.ReactNode
 }) {
-  const color = status === "online" ? "#4CAF50" : status === "away" ? "#FFEB3B" : "transparent"
-  const visible = status === "online" || status === "away"
+  const color = status === "online" ? "#4CAF50" : status === "away" ? "#FFEB3B" : "#9CA3AF"
+  const visible = true
   return (
     <div className="relative inline-block">
       {children}

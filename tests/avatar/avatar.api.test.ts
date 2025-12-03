@@ -43,4 +43,3 @@ describe("avatar api", () => {
     expect(res.status).toBe(401)
   })
 })
-

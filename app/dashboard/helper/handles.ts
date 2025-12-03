@@ -95,11 +95,25 @@ export async function logout(routerPush: (path: string) => void) {
     const bearer = sessionStorage.getItem("auth_bearer")
     if (bearer) {
       sessionStorage.removeItem("auth_bearer")
+      try {
+        localStorage.removeItem("user_avatar")
+        localStorage.removeItem("user_id")
+        localStorage.removeItem("last_registered_email")
+        localStorage.removeItem("theme_preference")
+        localStorage.removeItem("sidebarOpen")
+      } catch {}
       console.info("ui_logout_bearer")
       routerPush("/login")
       return
     }
   } catch {}
   await fetch("/api/auth/logout", { method: "POST" })
+  try {
+    localStorage.removeItem("user_avatar")
+    localStorage.removeItem("user_id")
+    localStorage.removeItem("last_registered_email")
+    localStorage.removeItem("theme_preference")
+    localStorage.removeItem("sidebarOpen")
+  } catch {}
   routerPush("/login")
 }

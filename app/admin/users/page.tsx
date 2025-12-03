@@ -4,20 +4,14 @@ import { useEffect, useState } from "react"
 import Image from "next/image"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import Topbar from "@/app/dashboard/components/Topbar"
-import Sidebar from "@/app/dashboard/components/Sidebar"
-import { usePathname, useRouter } from "next/navigation"
-import { AuthProvider, useAuth } from "@/app/dashboard/contexts/auth-context"
-import { UIProvider, useUI } from "@/app/dashboard/contexts/ui-context"
-import { StatusProvider } from "@/app/dashboard/contexts/status-context"
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/app/dashboard/contexts/auth-context";
 
 type UserRow = { id: string; name: string; email: string; createdAt: string; role: string; status?: "online" | "away" | "offline" }
 
 function UsersDashboardContent() {
-  const router = useRouter()
-  const pathname = usePathname()
-  const { me, authChecked } = useAuth()
-  const { sidebarOpen, setSidebarOpen, touchStartX, setTouchStartX } = useUI()
+  const router = useRouter();
+  const { me, authChecked } = useAuth();
 
   const [users, setUsers] = useState<UserRow[]>([])
   const [page, setPage] = useState(1)
@@ -107,97 +101,128 @@ function UsersDashboardContent() {
     )
   }
 
-  const isAuthed = !!me && authChecked
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
-      {isAuthed && (
-        <Topbar
-          sidebarOpen={sidebarOpen}
-          onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
-          me={{ name: me?.name ?? "", avatarUrl: me?.avatarUrl ?? undefined, role: me?.role ?? "" }}
-          breadcrumb={"Dashboard / Usuários"}
-          onLogout={async () => { await fetch("/api/auth/logout", { method: "POST" }); router.push("/login") }}
+    <main className={`flex-1 w-full min-h-[calc(100vh-3.5rem)] px-4 py-10`}>
+      <div className="max-w-3xl mx-auto">
+        <Image
+          src="/Logo.jpg"
+          alt="Logo"
+          width={160}
+          height={160}
+          className="mx-auto rounded-full"
         />
-      )}
-      {isAuthed && sidebarOpen && (
-        <div aria-hidden="true" onClick={() => setSidebarOpen(false)} onTouchStart={(e) => setTouchStartX(e.touches[0]?.clientX ?? null)} onTouchMove={(e) => { const x = e.touches[0]?.clientX ?? 0; if (touchStartX !== null && Math.abs(x - touchStartX) > 50) setSidebarOpen(false) }} className="fixed inset-0 top-14 md:hidden bg-black/50 z-30 transition-opacity duration-300" />
-      )}
-      <div className="flex">
-        {isAuthed && (
-          <Sidebar sidebarOpen={sidebarOpen} onCloseSidebar={() => setSidebarOpen(false)} pathname={pathname} role={me?.role ?? ""} touchStartX={touchStartX} setTouchStartX={setTouchStartX} />
-        )}
-        <main className={`flex-1 w-full min-h-[calc(100vh-3.5rem)] px-4 py-10 ${isAuthed && sidebarOpen ? "md:pl-64" : ""}`}>
-          <div className="max-w-3xl mx-auto">
-            <Image src="/Logo.jpg" alt="Logo" width={160} height={160} className="mx-auto rounded-full" />
-            <h1 className="mt-4 text-2xl md:text-3xl font-semibold text-slate-900 dark:text-slate-300 text-center">Painel Administrativo</h1>
-            <p className="text-center text-slate-500 dark:text-slate-400">Gerencie todos os usuários registrados</p>
+        <h1 className="mt-4 text-2xl md:text-3xl font-semibold text-slate-900 dark:text-slate-300 text-center">
+          Painel Administrativo
+        </h1>
+        <p className="text-center text-slate-500 dark:text-slate-400">
+          Gerencie todos os usuários registrados
+        </p>
 
-            <div className="mt-6 bg-slate-800 border border-slate-700 rounded p-4 flex flex-col md:flex-row gap-3 items-center">
-              <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar por nome ou email..." className="bg-slate-700 border-slate-600 text-white flex-1" />
-              <Input value={emailFilter} onChange={(e) => setEmailFilter(e.target.value)} placeholder="Filtrar por email..." className="bg-slate-700 border-slate-600 text-white flex-1" />
-              <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="bg-slate-700 border border-slate-600 text-white rounded p-2">
-                <option value="">Todos</option>
-                <option value="active">Ativo</option>
-                <option value="inactive">Inativo</option>
-              </select>
-              <Button onClick={() => fetchUsers(1)} disabled={loading} className="bg-blue-600 hover:bg-blue-700">Atualizar</Button>
-            </div>
+        <div className="mt-6 bg-slate-800 border border-slate-700 rounded p-4 flex flex-col md:flex-row gap-3 items-center">
+          <Input
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="Buscar por nome ou email..."
+            className="bg-slate-700 border-slate-600 text-white flex-1"
+          />
+          <Input
+            value={emailFilter}
+            onChange={(e) => setEmailFilter(e.target.value)}
+            placeholder="Filtrar por email..."
+            className="bg-slate-700 border-slate-600 text-white flex-1"
+          />
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="bg-slate-700 border border-slate-600 text-white rounded p-2"
+          >
+            <option value="">Todos</option>
+            <option value="active">Ativo</option>
+            <option value="inactive">Inativo</option>
+          </select>
+          <Button
+            onClick={() => fetchUsers(1)}
+            disabled={loading}
+            className="bg-blue-600 hover:bg-blue-700"
+          >
+            Atualizar
+          </Button>
+        </div>
 
-            <div className="mt-4 bg-slate-800 border border-slate-700 rounded overflow-hidden">
-              <div className="grid grid-cols-6 gap-2 px-4 py-2 text-slate-300">
-                <div>ID do usuário</div>
-                <div>Nome completo</div>
-                <div>E-mail</div>
-                <div>Data de criação</div>
-                <div>Status</div>
-                <div>Ações</div>
-              </div>
-              <div>
-                {users.filter((u) => {
-                  if (statusFilter === "active") return (u.status === "online")
-                  if (statusFilter === "inactive") return (u.status !== "online")
-                  return true
-                }).map((u) => (
-                  <div id={`user-row-${u.id}`} key={u.id} className="grid grid-cols-6 gap-2 px-4 py-2 border-t border-slate-700 items-center">
-                    <div className="truncate text-slate-400">{u.id}</div>
-                    <div className="text-white font-medium">{u.name}</div>
-                    <div className="text-slate-300 truncate">{u.email}</div>
-                    <div className="text-slate-300">{new Date(u.createdAt).toLocaleDateString()}</div>
-                    <div>{renderStatus(u.status)}</div>
-                    <div>
-                      {isAdmin && (
-                        <Button onClick={() => doImpersonate(u.id)} className="bg-slate-700 hover:bg-slate-600">Login Automático</Button>
-                      )}
-                    </div>
+        <div className="mt-4 bg-slate-800 border border-slate-700 rounded overflow-hidden">
+          <div className="grid grid-cols-6 gap-2 px-4 py-2 text-slate-300">
+            <div>ID do usuário</div>
+            <div>Nome completo</div>
+            <div>E-mail</div>
+            <div>Data de criação</div>
+            <div>Status</div>
+            <div>Ações</div>
+          </div>
+          <div>
+            {users
+              .filter((u) => {
+                if (statusFilter === "active") return u.status === "online";
+                if (statusFilter === "inactive") return u.status !== "online";
+                return true;
+              })
+              .map((u) => (
+                <div
+                  id={`user-row-${u.id}`}
+                  key={u.id}
+                  className="grid grid-cols-6 gap-2 px-4 py-2 border-t border-slate-700 items-center"
+                >
+                  <div className="truncate text-slate-400">{u.id}</div>
+                  <div className="text-white font-medium">{u.name}</div>
+                  <div className="text-slate-300 truncate">{u.email}</div>
+                  <div className="text-slate-300">
+                    {new Date(u.createdAt).toLocaleDateString()}
                   </div>
-                ))}
-                {users.length === 0 && (
-                  <div className="px-4 py-6 text-center text-slate-400">Nenhum usuário encontrado</div>
-                )}
-              </div>
-              <div className="flex items-center justify-between px-4 py-2 border-t border-slate-700">
-                <div className="text-slate-400">Página {page} de {totalPages}</div>
-                <div className="flex gap-2">
-                  <Button disabled={page<=1} onClick={() => fetchUsers(page-1)} className="bg-slate-700">Anterior</Button>
-                  <Button disabled={page>=totalPages} onClick={() => fetchUsers(page+1)} className="bg-slate-700">Próxima</Button>
+                  <div>{renderStatus(u.status)}</div>
+                  <div>
+                    {isAdmin && (
+                      <Button
+                        onClick={() => doImpersonate(u.id)}
+                        className="bg-slate-700 hover:bg-slate-600"
+                      >
+                        Login Automático
+                      </Button>
+                    )}
+                  </div>
                 </div>
+              ))}
+            {users.length === 0 && (
+              <div className="px-4 py-6 text-center text-slate-400">
+                Nenhum usuário encontrado
               </div>
+            )}
+          </div>
+          <div className="flex items-center justify-between px-4 py-2 border-t border-slate-700">
+            <div className="text-slate-400">
+              Página {page} de {totalPages}
+            </div>
+            <div className="flex gap-2">
+              <Button
+                disabled={page <= 1}
+                onClick={() => fetchUsers(page - 1)}
+                className="bg-slate-700"
+              >
+                Anterior
+              </Button>
+              <Button
+                disabled={page >= totalPages}
+                onClick={() => fetchUsers(page + 1)}
+                className="bg-slate-700"
+              >
+                Próxima
+              </Button>
             </div>
           </div>
-        </main>
+        </div>
       </div>
-    </div>
-  )
+    </main>
+  );
 }
 
 export default function UsersPage() {
-  return (
-    <AuthProvider>
-      <UIProvider>
-        <StatusProvider>
-          <UsersDashboardContent />
-        </StatusProvider>
-      </UIProvider>
-    </AuthProvider>
-  )
+  return <UsersDashboardContent />;
 }

@@ -1,27 +1,20 @@
 "use client"
 import { useEffect } from "react";
-import { usePathname, useRouter } from "next/navigation"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Button } from "@/components/ui/button"
+
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 import { Eye, EyeOff, UserPlus } from "lucide-react";
-import { toast } from "sonner"
-import Image from "next/image"
-import { UIProvider, useUI } from "@/app/dashboard/contexts/ui-context";
-import { AuthProvider, useAuth } from "@/app/dashboard/contexts/auth-context";
+import { toast } from "sonner";
+import Image from "next/image";
+import { useAuth } from "@/app/dashboard/contexts/auth-context";
 import {
   RegisterFormProvider,
   useRegisterForm,
 } from "./contexts/register-form-context";
 import FloatingAttendanceFAB from "@/components/attendance/FloatingAttendanceFAB";
-import Topbar from "@/app/dashboard/components/Topbar";
-import Sidebar from "@/app/dashboard/components/Sidebar";
-import { StatusProvider } from "@/app/dashboard/contexts/status-context";
 
 function RegisterPageContent() {
-  const router = useRouter();
-  const pathname = usePathname();
-  const { sidebarOpen, setSidebarOpen, touchStartX, setTouchStartX } = useUI();
   const { me, authChecked } = useAuth();
   const {
     name,
@@ -47,24 +40,6 @@ function RegisterPageContent() {
   }, []);
 
   // Auth fetch deslocado para AuthProvider
-
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem("sidebarOpen");
-      if (saved !== null) setSidebarOpen(saved === "true");
-    } catch {}
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setSidebarOpen(false);
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, []);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem("sidebarOpen", String(sidebarOpen));
-    } catch {}
-  }, [sidebarOpen]);
 
   const submit = async () => {
     setLoading(true);
@@ -126,53 +101,9 @@ function RegisterPageContent() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
-      {isAuthed && (
-        <Topbar
-          sidebarOpen={sidebarOpen}
-          onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}
-          me={{
-            name: me?.name ?? "",
-            avatarUrl: me?.avatarUrl ?? undefined,
-            role: me?.role ?? "",
-          }}
-          onLogout={async () => {
-            await fetch("/api/auth/logout", { method: "POST" });
-            router.push("/login");
-          }}
-          breadcrumb={"Dashboard / Cadastrar Usuários"}
-        />
-      )}
-
-      {isAuthed && sidebarOpen && (
-        <div
-          aria-hidden="true"
-          onClick={() => setSidebarOpen(false)}
-          onTouchStart={(e) => setTouchStartX(e.touches[0]?.clientX ?? null)}
-          onTouchMove={(e) => {
-            const x = e.touches[0]?.clientX ?? 0;
-            if (touchStartX !== null && Math.abs(x - touchStartX) > 50)
-              setSidebarOpen(false);
-          }}
-          className="fixed inset-0 top-14 md:hidden bg-black/50 z-30 transition-opacity duration-300"
-        />
-      )}
-
       <div className="flex">
-        {isAuthed && (
-          <Sidebar
-            sidebarOpen={sidebarOpen}
-            onCloseSidebar={() => setSidebarOpen(false)}
-            pathname={pathname}
-            role={me?.role ?? ""}
-            touchStartX={touchStartX}
-            setTouchStartX={setTouchStartX}
-          />
-        )}
-
         <main
-          className={`flex-1 w-full min-h-[calc(100vh-3.5rem)] flex items-center justify-center px-4 py-10 ${
-            isAuthed && sidebarOpen ? "md:pl-64" : ""
-          }`}
+          className={`flex-1 w-full min-h-[calc(100vh-3.5rem)] flex items-center justify-center px-4 py-10`}
         >
           <div className="w-full max-w-md bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg p-6 space-y-4">
             <Image
@@ -291,15 +222,9 @@ function RegisterPageContent() {
 
 export default function RegisterPage() {
   return (
-    <AuthProvider>
-      <UIProvider>
-        <StatusProvider>
-          <RegisterFormProvider>
-            <RegisterPageContent />
-          </RegisterFormProvider>
-        </StatusProvider>
-      </UIProvider>
-    </AuthProvider>
+    <RegisterFormProvider>
+      <RegisterPageContent />
+    </RegisterFormProvider>
   );
 }
 

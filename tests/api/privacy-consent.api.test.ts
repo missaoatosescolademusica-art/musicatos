@@ -19,9 +19,8 @@ describe("privacy consent api", () => {
   })
 
   it("rejects invalid body", async () => {
-    // @ts-expect-error
+  
     const r = await POST(req("http://localhost/api/privacy/consent", { analytics: "yes", marketing: false, accepted: true, declined: false }))
     expect(r.status).toBe(400)
   })
 })
-

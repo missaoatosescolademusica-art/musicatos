@@ -30,12 +30,10 @@ describe("session isolation", () => {
     const resProf = await ME(reqWithBearer("http://localhost/api/auth/me", prof.id, "professor"))
     expect(resProf.status).toBe(200)
 
-    // simulate professor logout by using expired bearer
     const expiredBearer = new NextRequest(new Request("http://localhost/api/auth/me", { headers: new Headers({ Authorization: `Bearer ${generateJwt({ sub: prof.id, role: "professor" }, -1)}` }) }))
     const resExpired = await ME(expiredBearer)
     expect(resExpired.status).toBe(401)
 
-    // admin remains active
     const resAdmin2 = await ME(reqWithCookie("http://localhost/api/auth/me", admin.id, "admin"))
     expect(resAdmin2.status).toBe(200)
   }, 15000)

@@ -4,7 +4,6 @@ import { NextRequest } from "next/server"
 
 function makeReq(url: string, options: any = {}) {
   const req = new Request(url, options)
-  // NextRequest expects headers/cookies; for our unauthorized tests, basics suffice
   return new NextRequest(req)
 }
 
@@ -19,4 +18,3 @@ describe("attendance api", () => {
     expect(res.status).toBe(401)
   })
 })
-

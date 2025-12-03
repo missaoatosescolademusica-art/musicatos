@@ -46,12 +46,13 @@ model User {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  auditLogs         AuditLog[]
-  markedAttendances Attendance[] @relation("MarkedBy")
-  avatar            UserAvatar?
+  auditLogs            AuditLog[]
+  markedAttendances    Attendance[]           @relation("MarkedBy")
+  avatar               UserAvatar?
   adminImpersonations  ImpersonationSession[] @relation("AdminImpersonations")
   targetImpersonations ImpersonationSession[] @relation("TargetImpersonations")
-  passwordResets   PasswordReset[]
+  passwordResets       PasswordReset[]
+  resources            Resource[]
 
   @@index([email])
 }
@@ -123,35 +124,59 @@ model ImpersonationSession {
   @@index([userId])
   @@index([expiresAt])
 }
-model PasswordReset {
-  id         String   @id @default(cuid())
-  userId     String
-  user       User     @relation(fields: [userId], references: [id])
-  code       String
-  token      String?
-  attempts   Int      @default(0)
-  used       Boolean  @default(false)
-  expiresAt  DateTime
-  createdAt  DateTime @default(now())
 
+model PasswordReset {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  code      String
+  token     String?
+  attempts  Int      @default(0)
+  used      Boolean  @default(false)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@unique([token])
   @@index([userId])
   @@index([expiresAt])
-  @@unique([token])
 }
 
 model ConsentLog {
-  id         String   @id @default(cuid())
-  userId     String?
-  necessary  Boolean
-  analytics  Boolean
-  marketing  Boolean
-  accepted   Boolean
-  declined   Boolean
-  timestamp  DateTime
-  ip         String?
-  userAgent  String?
-  createdAt  DateTime @default(now())
+  id        String   @id @default(cuid())
+  userId    String?
+  necessary Boolean
+  analytics Boolean
+  marketing Boolean
+  accepted  Boolean
+  declined  Boolean
+  timestamp DateTime
+  ip        String?
+  userAgent String?
+  createdAt DateTime @default(now())
 
   @@index([createdAt])
   @@index([userId])
+}
+
+enum ResourceType {
+  pdf
+  mp3
+  youtube
+}
+
+model Resource {
+  id           String       @id @default(cuid())
+  type         ResourceType
+  path         String
+  originalName String
+  size         BigInt?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  createdById  String
+  createdBy    User         @relation(fields: [createdById], references: [id])
+
+  @@unique([type, path])
+  @@index([type])
+  @@index([createdAt])
+  @@index([createdById])
 }

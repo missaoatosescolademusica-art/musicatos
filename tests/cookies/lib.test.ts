@@ -38,4 +38,3 @@ describe("cookies lib", () => {
     expect(shouldShowConsent(1000)).toBe(false)
   })
 })
-

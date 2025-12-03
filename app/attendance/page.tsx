@@ -65,7 +65,7 @@ function AttendanceContent() {
       const res = await fetch(`/api/attendance?${params.toString()}`)
       const json = await res.json()
       if (res.ok) {
-        console.debug("attendance_ui_fetch_ok", { count: json.data?.length ?? 0, page: json.page, totalPages: json.totalPages })
+        console.info("attendance_ui_fetch_ok", { count: json.data?.length ?? 0, page: json.page, totalPages: json.totalPages })
         setData(json.data)
         setTotalPages(json.totalPages)
       } else {
@@ -90,7 +90,7 @@ function AttendanceContent() {
     if (loading) return
     setLoading(true)
     try {
-      console.debug("attendance_ui_mark", { studentId, status: s, date })
+      console.info("attendance_ui_mark", { studentId, status: s, date })
       const res = await fetch("/api/attendance", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

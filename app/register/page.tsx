@@ -1,11 +1,10 @@
 "use client"
-import { useEffect } from "react"
-import Link from "next/link"
+import { useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
-import { Eye, EyeOff, UserPlus, Menu, UserCog, Home, LogOut } from "lucide-react"
+import { Eye, EyeOff, UserPlus } from "lucide-react";
 import { toast } from "sonner"
 import Image from "next/image"
 import { UIProvider, useUI } from "@/app/dashboard/contexts/ui-context";

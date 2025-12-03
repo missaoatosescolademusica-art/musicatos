@@ -15,7 +15,7 @@ export async function fetchStudents(deps: FetchStudentsDeps) {
     const data = await response.json()
     setStudents(data.students)
     setTotalPages(data.totalPages)
-  } catch (error) {
+  } catch (_error) {
     toast.error("Erro ao carregar estudantes")
   } finally {
     setLoading(false)
@@ -55,7 +55,7 @@ export async function handleDeleteStudent(id: string, deps: DeleteDeps) {
 
     toast.success("Estudante deletado com sucesso")
     await Promise.resolve(deps.fetchStudents())
-  } catch (error) {
+  } catch (_error) {
     toast.error("Erro ao deletar estudante")
   }
 }
@@ -85,7 +85,7 @@ export async function handleSaveStudent(
     toast.success("Estudante atualizado com sucesso")
     setDialogOpen(false)
     await Promise.resolve(fetchStudents())
-  } catch (error) {
+  } catch (_error) {
     toast.error("Erro ao atualizar estudante")
   }
 }

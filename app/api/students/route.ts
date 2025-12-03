@@ -93,7 +93,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log("[v0] Creating student with data:", {
+    console.info("[v0] Creating student with data:", {
       fullName,
       nameFather,
       nameMother,
@@ -115,7 +115,7 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    console.log("[v0] Student created successfully:", student.id);
+    console.info("[v0] Student created successfully:", student.id);
     return NextResponse.json(student, { status: 201 });
   } catch (error) {
     console.error(

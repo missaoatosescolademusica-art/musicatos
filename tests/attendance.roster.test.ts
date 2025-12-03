@@ -24,7 +24,7 @@ describe("attendance roster api", () => {
     const nameA = `Aluno A ${Date.now()}`
     const nameB = `Aluno B ${Date.now()}`
     const a = await prisma.student.create({ data: { fullName: nameA, nameFather: "Pai A", nameMother: "Mae A", phone: "000", address: "Rua 1", instruments: [], available: true } })
-    const b = await prisma.student.create({ data: { fullName: nameB, nameFather: "Pai B", nameMother: "Mae B", phone: "111", address: "Rua 2", instruments: [], available: true, createdAt: new Date(Date.now() - 365*24*60*60*1000) } })
+    const _b = await prisma.student.create({ data: { fullName: nameB, nameFather: "Pai B", nameMother: "Mae B", phone: "111", address: "Rua 2", instruments: [], available: true, createdAt: new Date(Date.now() - 365*24*60*60*1000) } })
 
     const resList = await GET(reqWithCookie(`http://localhost/api/attendance?mode=roster&page=1&limit=50&q=Aluno`))
     const jsonList: any = await resList.json()

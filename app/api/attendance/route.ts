@@ -2,11 +2,6 @@ import { NextRequest, NextResponse } from "next/server"
 import { prisma } from "@/lib/db"
 import { getAuthInfo } from "@/lib/auth"
 
-async function getAuthUserId(req: NextRequest) {
-  const auth = await getAuthInfo(req)
-  return auth?.userId || null
-}
-
 export async function GET(request: NextRequest) {
   try {
     const auth = await getAuthInfo(request)
@@ -23,7 +18,14 @@ export async function GET(request: NextRequest) {
     const availableParam = searchParams.get("available")
     const available = availableParam === "true" ? true : availableParam === "false" ? false : undefined
 
-    console.debug("attendance_get_params", { page, limit, status, date, q, mode })
+    console.info("attendance_get_params", {
+      page,
+      limit,
+      status,
+      date,
+      q,
+      mode,
+    });
 
     if (mode === "roster") {
       const baseWhere: any = {}
@@ -69,7 +71,13 @@ export async function GET(request: NextRequest) {
         else data = data.filter(x => x.status === status)
       }
 
-      console.debug("attendance_roster_count", { total: data.length, page, totalPages: Math.max(1, Math.ceil(totalStudents / limit)), instrument, available })
+      console.info("attendance_roster_count", {
+        total: data.length,
+        page,
+        totalPages: Math.max(1, Math.ceil(totalStudents / limit)),
+        instrument,
+        available,
+      });
       return NextResponse.json({ data, page, totalPages: Math.max(1, Math.ceil(totalStudents / limit)) })
     }
 
@@ -99,7 +107,11 @@ export async function GET(request: NextRequest) {
       data = data.filter((a) => a.student.fullName.toLowerCase().includes(qq) || a.student.nameFather.toLowerCase().includes(qq) || a.student.nameMother.toLowerCase().includes(qq))
     }
 
-    console.debug("attendance_list_count", { total: data.length, page, totalPages: Math.max(1, Math.ceil(total / limit)) })
+    console.info("attendance_list_count", {
+      total: data.length,
+      page,
+      totalPages: Math.max(1, Math.ceil(total / limit)),
+    });
     return NextResponse.json({ data, page, totalPages: Math.max(1, Math.ceil(total / limit)) })
   } catch (error) {
     console.error("attendance_list_error", error)
@@ -111,7 +123,10 @@ export async function POST(request: NextRequest) {
   try {
     const auth = await getAuthInfo(request)
     if (!auth) return NextResponse.json({ message: "Não autenticado" }, { status: 401 })
-    console.debug("attendance_post_auth", { userId: auth.userId, role: auth.role })
+    console.info("attendance_post_auth", {
+      userId: auth.userId,
+      role: auth.role,
+    });
     if (!["admin", "professor"].includes(auth.role)) {
       return NextResponse.json({ message: "Sem permissão" }, { status: 403 })
     }

@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog"
 import { toast } from "sonner"
-import { CheckSquare, ClipboardList, ChevronDown } from "lucide-react"
+import { ClipboardList, ChevronDown } from "lucide-react"
 import { useAuth } from "@/app/dashboard/contexts/auth-context"
 
 type RosterItem = {
@@ -23,13 +23,13 @@ export default function FloatingAttendanceFAB() {
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [list, setList] = useState<RosterItem[]>([])
-  const [date, setDate] = useState<string>(todayStr())
+  //
   const bcRef = useRef<BroadcastChannel | null>(null)
 
   const fetchRoster = async () => {
     setLoading(true)
     try {
-      const params = new URLSearchParams({ mode: "roster", date, page: "1", limit: "500" })
+      const params = new URLSearchParams({ mode: "roster", date: todayStr(), page: "1", limit: "500" })
       const res = await fetch(`/api/attendance?${params.toString()}`)
       const json = await res.json()
       if (res.ok) setList(json.data || [])
@@ -38,7 +38,7 @@ export default function FloatingAttendanceFAB() {
     }
   }
 
-  useEffect(() => { if (open) fetchRoster() }, [open, date])
+  useEffect(() => { if (open) fetchRoster() }, [open])
 
   const grouped = useMemo(() => {
     const present: RosterItem[] = [], absent: RosterItem[] = [], unmarked: RosterItem[] = [], late: RosterItem[] = []

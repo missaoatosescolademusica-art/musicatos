@@ -104,7 +104,7 @@ export async function DELETE(request: NextRequest, context: { params: any }) {
     if (!id)
       return NextResponse.json({ message: "ID inválido" }, { status: 400 });
 
-    const student = await prisma.student.delete({
+    await prisma.student.delete({
       where: { id },
     });
 

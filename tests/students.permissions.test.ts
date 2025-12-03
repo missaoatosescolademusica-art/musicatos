@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest"
 import { NextRequest } from "next/server"
 import { GET as GET_STUDENTS, POST as POST_STUDENTS } from "@/app/api/students/route"
-import { GET as GET_STUDENT, PUT as PUT_STUDENT, DELETE as DELETE_STUDENT } from "@/app/api/students/[id]/route"
+import { PUT as PUT_STUDENT, DELETE as DELETE_STUDENT } from "@/app/api/students/[id]/route"
 import { prisma } from "@/lib/db"
 import { generateJwt } from "@/lib/auth"
 

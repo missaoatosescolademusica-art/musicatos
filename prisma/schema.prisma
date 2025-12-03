@@ -138,3 +138,20 @@ model PasswordReset {
   @@index([expiresAt])
   @@unique([token])
 }
+
+model ConsentLog {
+  id         String   @id @default(cuid())
+  userId     String?
+  necessary  Boolean
+  analytics  Boolean
+  marketing  Boolean
+  accepted   Boolean
+  declined   Boolean
+  timestamp  DateTime
+  ip         String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([userId])
+}

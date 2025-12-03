@@ -6,7 +6,7 @@ export async function GET() {
     // Test database connection
     await prisma.$queryRaw`SELECT 1`
 
-    console.log("[v0] Database connection successful")
+    console.info("[v0] Database connection successful")
     return NextResponse.json({ message: "Conexão com banco de dados OK" }, { status: 200 })
   } catch (error) {
     console.error("[v0] Database connection failed:", error)

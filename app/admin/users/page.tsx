@@ -1,10 +1,9 @@
 "use client"
 import React from "react"
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useEffect, useState } from "react"
 import Image from "next/image"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Label } from "@/components/ui/label"
 import Topbar from "@/app/dashboard/components/Topbar"
 import Sidebar from "@/app/dashboard/components/Sidebar"
 import { usePathname, useRouter } from "next/navigation"
@@ -27,7 +26,7 @@ function UsersDashboardContent() {
   const [q, setQ] = useState("")
   const [emailFilter, setEmailFilter] = useState("")
   const [statusFilter, setStatusFilter] = useState("")
-  const highlightRef = useRef<HTMLDivElement | null>(null)
+  //
 
   const isAdmin = me?.role === "admin"
   useEffect(() => { if (authChecked && !isAdmin) router.replace("/login") }, [authChecked, isAdmin])
@@ -141,7 +140,7 @@ function UsersDashboardContent() {
                 <option value="active">Ativo</option>
                 <option value="inactive">Inativo</option>
               </select>
-              <Button onClick={() => fetchUsers(1)} className="bg-blue-600 hover:bg-blue-700">Atualizar</Button>
+              <Button onClick={() => fetchUsers(1)} disabled={loading} className="bg-blue-600 hover:bg-blue-700">Atualizar</Button>
             </div>
 
             <div className="mt-4 bg-slate-800 border border-slate-700 rounded overflow-hidden">

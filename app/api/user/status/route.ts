@@ -10,12 +10,15 @@ function compute(id: string): Presence {
 
 export async function GET(request: NextRequest) {
   try {
-    const idsParam = request.nextUrl.searchParams.get("ids") || ""
-    const ids = idsParam.split(",").map((s) => s.trim()).filter(Boolean)
-    if (ids.length === 0) return NextResponse.json({ statuses: [] })
-    const statuses = ids.map((id) => ({ id, status: compute(id) }))
-    return NextResponse.json({ statuses })
-  } catch (error) {
-    return NextResponse.json({ message: "Erro no servidor" }, { status: 500 })
+    const idsParam = request.nextUrl.searchParams.get("ids") || "";
+    const ids = idsParam
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
+    if (ids.length === 0) return NextResponse.json({ statuses: [] });
+    const statuses = ids.map((id) => ({ id, status: compute(id) }));
+    return NextResponse.json({ statuses });
+  } catch (_error) {
+    return NextResponse.json({ message: "Erro no servidor" }, { status: 500 });
   }
 }

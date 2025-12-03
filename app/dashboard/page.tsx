@@ -42,7 +42,7 @@ function DashboardContent() {
     students,
     loading,
     searchQuery,
-    setSearchQuery,
+    setSearchQuery: _setSearchQuery,
     currentPage,
     setCurrentPage,
     totalPages,
@@ -191,7 +191,7 @@ function DashboardContent() {
               loading={loading}
               currentPage={currentPage}
               totalPages={totalPages}
-              pageSize={10}
+              pageSize={itemsPerPage}
               onPageChange={(p) => setCurrentPage(p)}
               containerClassName="bg-slate-800 border-slate-700 overflow-hidden shadow-xl"
               headerRowClassName="bg-slate-700"

@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
-import { Music, Menu, UserPlus, UserCog, Home, LogOut } from "lucide-react";
+import { Music, UserPlus, UserCog, Home } from "lucide-react";
 import Image from "next/image";
 import Topbar from "@/app/dashboard/components/Topbar";
 import { AuthProvider, useAuth } from "@/app/dashboard/contexts/auth-context";
@@ -83,9 +83,7 @@ function HomeContent() {
     setFormData({ ...formData, phone: formatted });
   };
 
-  const handleInstrumentsChange = (selected: string[]) => {
-    setFormData({ ...formData, instruments: selected });
-  };
+  //
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -115,7 +113,7 @@ function HomeContent() {
       });
 
       if (!response.ok) {
-        console.log(response);
+        console.info(response);
         const error = await response.json();
         throw new Error(error.message || "Erro ao registrar estudante");
       }

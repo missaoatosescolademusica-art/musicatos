@@ -6,6 +6,7 @@ import Sidebar from "@/app/dashboard/components/Sidebar"
 import { useAuth } from "@/app/dashboard/contexts/auth-context"
 import { useStatus } from "@/app/dashboard/contexts/status-context"
 import { logout } from "@/app/dashboard/helper/handles"
+import SiteFooter from "@/components/shared/SiteFooter";
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
@@ -86,7 +87,10 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         />
       )}
       {(!authChecked || !me) && (
-        <div className="sticky top-0 z-40 h-14 bg-slate-900/20 backdrop-blur border-b border-slate-800" aria-hidden="true" />
+        <div
+          className="sticky top-0 z-40 h-14 bg-slate-900/20 backdrop-blur border-b border-slate-800"
+          aria-hidden="true"
+        />
       )}
       {authChecked && me && (
         <Sidebar
@@ -101,6 +105,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       <div className="max-w-7xl md:max-w-full mx-auto md:px-0 md:py-0 px-4 py-6">
         {children}
       </div>
+      <SiteFooter />
     </div>
-  )
+  );
 }

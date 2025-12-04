@@ -17,7 +17,8 @@ export async function GET(_request: NextRequest, { params }: { params: { id: str
   try {
     const item = await prisma.resource.findUnique({ where: { id: params.id } })
     if (!item) return NextResponse.json({ message: "Não encontrado" }, { status: 404 })
-    return NextResponse.json({ resource: item })
+    const resource = { ...item, size: item.size != null ? Number(item.size) : null }
+    return NextResponse.json({ resource })
   } catch (error) {
     console.error("resources_get_error", error)
     return NextResponse.json({ message: "Erro no servidor" }, { status: 500 })
@@ -43,7 +44,8 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     if (Object.keys(updates).length === 0) return NextResponse.json({ message: "Nada a atualizar" }, { status: 400 })
     const updated = await prisma.resource.update({ where: { id: params.id }, data: updates })
     await prisma.auditLog.create({ data: { action: "UPDATE", entity: "Resource", entityId: updated.id, userId: auth.userId, metadata: updates } })
-    return NextResponse.json({ resource: updated })
+    const resource = { ...updated, size: updated.size != null ? Number(updated.size) : null }
+    return NextResponse.json({ resource })
   } catch (error) {
     console.error("resources_update_error", error)
     return NextResponse.json({ message: "Erro no servidor" }, { status: 500 })

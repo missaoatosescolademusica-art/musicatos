@@ -1,7 +1,7 @@
 "use client"
 import Link from "next/link"
 import Image from "next/image"
-import { Home, UserCog, UserPlus } from "lucide-react"
+import { Hammer, Home, UserCog, UserPlus } from "lucide-react";
 
 type Props = {
   sidebarOpen: boolean;
@@ -56,6 +56,19 @@ function Sidebar({
         >
           <UserPlus className="h-4 w-4" />
           <span>Adicionar Estudante</span>
+        </Link>
+        <Link
+          href="/resources"
+          className={`flex items-center gap-2 px-3 py-2 rounded hover:bg-slate-700 transition ${
+            pathname === "/resources"
+              ? "bg-slate-700 text-white"
+              : "text-slate-300"
+          }`}
+          onClick={onCloseSidebar}
+          aria-current={pathname === "/resources" ? "page" : undefined}
+        >
+          <Hammer className="h-4 w-4" />
+          <span>Recursos</span>
         </Link>
         {role === "admin" && (
           <Link

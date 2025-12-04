@@ -31,6 +31,10 @@ function validYouTube(url: string) {
   return { ok: false }
 }
 
+function toJsonResource(r: any) {
+  return { ...r, size: r?.size != null ? Number(r.size) : null };
+}
+
 export async function GET(request: NextRequest) {
   try {
     const auth = await getAuthInfo(request)
@@ -54,7 +58,12 @@ export async function GET(request: NextRequest) {
       }),
       prisma.resource.count({ where }),
     ])
-    return NextResponse.json({ data: items, page, totalPages: Math.max(1, Math.ceil(total / limit)) })
+    const data = items.map(toJsonResource);
+    return NextResponse.json({
+      data,
+      page,
+      totalPages: Math.max(1, Math.ceil(total / limit)),
+    });
   } catch (error) {
     console.error("resources_list_error", error)
     return NextResponse.json({ message: "Erro no servidor" }, { status: 500 })
@@ -94,7 +103,10 @@ export async function POST(request: NextRequest) {
         data: { type, path: rel, originalName, size: BigInt(file.size), createdById: auth.userId },
       })
       await prisma.auditLog.create({ data: { action: "CREATE", entity: "Resource", entityId: created.id, userId: auth.userId, metadata: { type, path: rel } } })
-      return NextResponse.json({ resource: created }, { status: 201 })
+      return NextResponse.json(
+        { resource: toJsonResource(created) },
+        { status: 201 }
+      );
     } else {
       const body = await request.json().catch(() => ({}))
       const raw = String(body.url || "")
@@ -105,7 +117,10 @@ export async function POST(request: NextRequest) {
       if (dup) return NextResponse.json({ message: "Recurso duplicado" }, { status: 409 })
       const created = await prisma.resource.create({ data: { type: "youtube", path: url, originalName: ok.id!, createdById: auth.userId } })
       await prisma.auditLog.create({ data: { action: "CREATE", entity: "Resource", entityId: created.id, userId: auth.userId, metadata: { type: "youtube", path: url } } })
-      return NextResponse.json({ resource: created }, { status: 201 })
+      return NextResponse.json(
+        { resource: toJsonResource(created) },
+        { status: 201 }
+      );
     }
   } catch (error) {
     console.error("resources_create_error", error)

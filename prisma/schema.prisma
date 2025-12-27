@@ -168,6 +168,7 @@ model Resource {
   id           String       @id @default(cuid())
   type         ResourceType
   path         String
+  categoryPath String
   originalName String
   size         BigInt?
   createdAt    DateTime     @default(now())

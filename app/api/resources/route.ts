@@ -26,7 +26,13 @@ function validYouTube(url: string) {
   ]
   for (const re of patterns) {
     const m = re.exec(trimmed)
-    if (m) return { ok: true, id: m[1], url: `https://www.youtube.com/watch?v=${m[1]}` }
+    if (m)
+      return {
+        ok: true,
+        categoryPath: "",
+        id: m[1],
+        url: `https://www.youtube.com/watch?v=${m[1]}`,
+      };
   }
   return { ok: false }
 }
@@ -100,8 +106,15 @@ export async function POST(request: NextRequest) {
       fs.writeFileSync(abs, buf)
 
       const created = await prisma.resource.create({
-        data: { type, path: rel, originalName, size: BigInt(file.size), createdById: auth.userId },
-      })
+        data: {
+          type,
+          path: rel,
+          categoryPath: (form.get("categoryPath") as string) || "",
+          originalName,
+          size: BigInt(file.size),
+          createdById: auth.userId,
+        },
+      });
       await prisma.auditLog.create({ data: { action: "CREATE", entity: "Resource", entityId: created.id, userId: auth.userId, metadata: { type, path: rel } } })
       return NextResponse.json(
         { resource: toJsonResource(created) },
@@ -115,7 +128,15 @@ export async function POST(request: NextRequest) {
       const url = ok.url!
       const dup = await prisma.resource.findFirst({ where: { type: "youtube", path: url } })
       if (dup) return NextResponse.json({ message: "Recurso duplicado" }, { status: 409 })
-      const created = await prisma.resource.create({ data: { type: "youtube", path: url, originalName: ok.id!, createdById: auth.userId } })
+      const created = await prisma.resource.create({
+        data: {
+          type: "youtube",
+          path: url,
+          categoryPath: ok.categoryPath || "",
+          originalName: ok.id!,
+          createdById: auth.userId,
+        },
+      });
       await prisma.auditLog.create({ data: { action: "CREATE", entity: "Resource", entityId: created.id, userId: auth.userId, metadata: { type: "youtube", path: url } } })
       return NextResponse.json(
         { resource: toJsonResource(created) },

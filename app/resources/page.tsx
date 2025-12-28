@@ -40,77 +40,98 @@ export default function ResourcesPage() {
   const [type, setType] = useState<ResourceType | "">("")
   const [uploading, setUploading] = useState(false)
   const [ytUrl, setYtUrl] = useState("")
-  const [file, setFile] = useState<File | null>(null)
+  const [category, setCategory] = useState("");
+  const [file, setFile] = useState<File | null>(null);
 
-  useEffect(() => { if (isAuthed) load(page) }, [isAuthed])
+  useEffect(() => {
+    if (isAuthed) load(page);
+  }, [isAuthed]);
 
   const load = async (p = 1) => {
-    if (!canManage) return
-    setLoading(true)
+    if (!canManage) return;
+    setLoading(true);
     try {
-      const params = new URLSearchParams()
-      params.set("page", String(p))
-      params.set("limit", "10")
-      if (type) params.set("type", type)
-      if (q) params.set("q", q)
-      const res = await fetch(`/api/resources?${params.toString()}`)
-      const json = await res.json()
+      const params = new URLSearchParams();
+      params.set("page", String(p));
+      params.set("limit", "10");
+      if (type) params.set("type", type);
+      if (q) params.set("q", q);
+      const res = await fetch(`/api/resources?${params.toString()}`);
+      const json = await res.json();
       if (res.ok) {
-        setItems(json.data || [])
-        setPage(json.page || 1)
-        setTotalPages(json.totalPages || 1)
+        setItems(json.data || []);
+        setPage(json.page || 1);
+        setTotalPages(json.totalPages || 1);
       }
-    } finally { setLoading(false) }
-  }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const onUpload = async () => {
-    if (!canManage) return
+    if (!canManage) return;
     if (file) {
-      setUploading(true)
+      setUploading(true);
       try {
-        const fd = new FormData()
-        fd.append("file", file)
-        const res = await fetch("/api/resources", { method: "POST", body: fd })
-        const j = await res.json().catch(() => ({}))
-        if (!res.ok) throw new Error(String(j.message || "Falha no upload"))
-        await load(page)
-        setFile(null)
+        const fd = new FormData();
+        fd.append("file", file);
+        const res = await fetch("/api/resources", { method: "POST", body: fd });
+        const j = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(String(j.message || "Falha no upload"));
+        await load(page);
+        setFile(null);
       } catch (e) {
-        console.error("resources_ui_upload_error", e)
-      } finally { setUploading(false) }
+        console.error("resources_ui_upload_error", e);
+      } finally {
+        setUploading(false);
+      }
     }
-  }
+  };
 
   const onCreateYouTube = async () => {
-    if (!canManage || !ytUrl) return
-    setUploading(true)
+    if (!canManage || !ytUrl) return;
+    setUploading(true);
     try {
-      const res = await fetch("/api/resources", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ url: ytUrl }) })
-      const j = await res.json().catch(() => ({}))
-      if (!res.ok) throw new Error(String(j.message || "Falha ao cadastrar URL"))
-      await load(page)
-      setYtUrl("")
+      const res = await fetch("/api/resources", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ url: ytUrl, categoryPath: category }),
+      });
+      const j = await res.json().catch(() => ({}));
+      if (!res.ok)
+        throw new Error(String(j.message || "Falha ao cadastrar URL"));
+      await load(page);
+      setYtUrl("");
     } catch (e) {
-      console.error("resources_ui_youtube_error", e)
-    } finally { setUploading(false) }
-  }
+      console.error("resources_ui_youtube_error", e);
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const onDelete = async (id: string) => {
-    if (!canManage) return
+    if (!canManage) return;
     try {
-      const res = await fetch(`/api/resources/${id}`, { method: "DELETE" })
-      if (res.ok) await load(page)
+      const res = await fetch(`/api/resources/${id}`, { method: "DELETE" });
+      if (res.ok) await load(page);
     } catch {}
-  }
+  };
 
   const onUpdate = async (r: Resource) => {
-    if (!canManage) return
-    const val = prompt(r.type === "youtube" ? "Nova URL do YouTube" : "Novo nome original", r.type === "youtube" ? r.path : r.originalName)
-    if (val === null) return
-    const body = r.type === "youtube" ? { url: val } : { originalName: val }
-    const res = await fetch(`/api/resources/${r.id}`, { method: "PUT", headers: { "content-type": "application/json" }, body: JSON.stringify(body) })
-    if (res.ok) await load(page)
-  }
+    if (!canManage) return;
+    const val = prompt(
+      r.type === "youtube" ? "Nova URL do YouTube" : "Novo nome original",
+      r.type === "youtube" ? r.path : r.originalName
+    );
+    if (val === null) return;
+    const body = r.type === "youtube" ? { url: val } : { originalName: val };
+    const res = await fetch(`/api/resources/${r.id}`, {
+      method: "PUT",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    if (res.ok) await load(page);
+  };
 
   const columns: Column<Resource>[] = useMemo(
     () => [
@@ -313,8 +334,8 @@ export default function ResourcesPage() {
               </h2>
               <p className="text-slate-400 text-sm">Ex.: Violão Classico</p>
               <Input
-                value={ytUrl}
-                onChange={(e) => setYtUrl(e.target.value)}
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
                 placeholder="Categoria da URL do vídeo"
                 className="mt-2 bg-slate-700 border-slate-600 text-white"
                 aria-label="Categoria da URL do YouTube"

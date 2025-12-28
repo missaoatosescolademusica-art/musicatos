@@ -122,17 +122,28 @@ export async function POST(request: NextRequest) {
       );
     } else {
       const body = await request.json().catch(() => ({}))
-      const raw = String(body.url || "")
-      const ok = validYouTube(raw)
-      if (!ok.ok) return NextResponse.json({ message: "URL do YouTube inválida" }, { status: 400 })
-      const url = ok.url!
-      const dup = await prisma.resource.findFirst({ where: { type: "youtube", path: url } })
-      if (dup) return NextResponse.json({ message: "Recurso duplicado" }, { status: 409 })
+      const raw = String(body.url || body.categoryPath || "");
+      const ok = validYouTube(raw);
+      if (!ok.ok)
+        return NextResponse.json(
+          { message: "URL do YouTube inválida" },
+          { status: 400 }
+        );
+      const url = ok.url!;
+      const categoryPath = ok.categoryPath || "";
+      const dup = await prisma.resource.findFirst({
+        where: { type: "youtube", path: url },
+      });
+      if (dup)
+        return NextResponse.json(
+          { message: "Recurso duplicado" },
+          { status: 409 }
+        );
       const created = await prisma.resource.create({
         data: {
           type: "youtube",
           path: url,
-          categoryPath: ok.categoryPath || "",
+          categoryPath: categoryPath,
           originalName: ok.id!,
           createdById: auth.userId,
         },

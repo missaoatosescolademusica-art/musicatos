@@ -34,6 +34,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     const body = await request.json().catch(() => ({}))
     const updates: any = {}
     if (typeof body.originalName === "string") updates.originalName = body.originalName.replace(/[\r\n\t\\<>:"|?*]/g, "").trim()
+    if (typeof body.categoryPath === "string") updates.categoryPath = body.categoryPath.trim()
     if (existing.type === "youtube" && typeof body.url === "string") {
       const url = body.url.trim()
       if (!/^https?:\/\/(www\.)?youtube\.com\//.test(url) && !/^https?:\/\/youtu\.be\//.test(url)) {

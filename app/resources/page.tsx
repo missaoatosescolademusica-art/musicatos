@@ -311,35 +311,22 @@ export default function ResourcesPage() {
               <p className="text-slate-400 text-sm">
                 Ex.: https://www.youtube.com/watch?v=dQw4w9WgXcQ
               </p>
-              <Input
-                value={ytUrl}
-                onChange={(e) => setYtUrl(e.target.value)}
-                placeholder="URL do vídeo"
-                className="mt-2 bg-slate-700 border-slate-600 text-white"
-                aria-label="URL do YouTube"
-              />
-              <div className="mt-3">
-                <Button
-                  onClick={onCreateYouTube}
-                  disabled={!ytUrl || uploading}
-                  className="bg-blue-600 hover:bg-blue-700"
-                >
-                  Cadastrar
-                </Button>
+              <div className="flex flex-col gap-3 mt-2">
+                <Input
+                  value={ytUrl}
+                  onChange={(e) => setYtUrl(e.target.value)}
+                  placeholder="URL do vídeo"
+                  className="bg-slate-700 border-slate-600 text-white"
+                  aria-label="URL do YouTube"
+                />
+                <Input
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  placeholder="Categoria (ex: Violão Clássico)"
+                  className="bg-slate-700 border-slate-600 text-white"
+                  aria-label="Categoria da URL do YouTube"
+                />
               </div>
-            </Card>
-            <Card className="bg-slate-900 border-slate-700 p-4">
-              <h2 className="text-slate-200 font-semibold">
-                Cadastrar categoria da URL
-              </h2>
-              <p className="text-slate-400 text-sm">Ex.: Violão Classico</p>
-              <Input
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                placeholder="Categoria da URL do vídeo"
-                className="mt-2 bg-slate-700 border-slate-600 text-white"
-                aria-label="Categoria da URL do YouTube"
-              />
               <div className="mt-3">
                 <Button
                   onClick={onCreateYouTube}

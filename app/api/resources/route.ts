@@ -122,17 +122,19 @@ export async function POST(request: NextRequest) {
       );
     } else {
       const body = await request.json().catch(() => ({}))
-      const raw = String(body.url || body.categoryPath || "");
-      const ok = validYouTube(raw);
+      const url = String(body.url || "").trim();
+      const categoryPath = String(body.categoryPath || "").trim();
+
+      const ok = validYouTube(url);
       if (!ok.ok)
         return NextResponse.json(
           { message: "URL do YouTube inválida" },
           { status: 400 }
         );
-      const url = ok.url!;
-      const categoryPath = ok.categoryPath || "";
+      
+      const validUrl = ok.url!;
       const dup = await prisma.resource.findFirst({
-        where: { type: "youtube", path: url },
+        where: { type: "youtube", path: validUrl },
       });
       if (dup)
         return NextResponse.json(
@@ -142,13 +144,13 @@ export async function POST(request: NextRequest) {
       const created = await prisma.resource.create({
         data: {
           type: "youtube",
-          path: url,
-          categoryPath: categoryPath,
+          path: validUrl,
+          categoryPath,
           originalName: ok.id!,
           createdById: auth.userId,
         },
       });
-      await prisma.auditLog.create({ data: { action: "CREATE", entity: "Resource", entityId: created.id, userId: auth.userId, metadata: { type: "youtube", path: url } } })
+      await prisma.auditLog.create({ data: { action: "CREATE", entity: "Resource", entityId: created.id, userId: auth.userId, metadata: { type: "youtube", path: validUrl } } })
       return NextResponse.json(
         { resource: toJsonResource(created) },
         { status: 201 }

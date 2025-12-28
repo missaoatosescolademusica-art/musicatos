@@ -6,6 +6,15 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { toast } from "sonner";
 
 type ResourceType = "pdf" | "mp3" | "youtube"
 type Resource = {
@@ -28,20 +37,30 @@ function formatBytes(b?: string | number | null) {
 }
 
 export default function ResourcesPage() {
-  const { me, authChecked } = useAuth()
-  const isAuthed = authChecked && !!me
-  const canManage = isAuthed && (me!.role === "admin" || me!.role === "professor")
+  const { me, authChecked } = useAuth();
+  const isAuthed = authChecked && !!me;
+  const canManage =
+    isAuthed && (me!.role === "admin" || me!.role === "professor");
 
-  const [items, setItems] = useState<Resource[]>([])
-  const [loading, setLoading] = useState(false)
-  const [page, setPage] = useState(1)
-  const [totalPages, setTotalPages] = useState(1)
-  const [q, setQ] = useState("")
-  const [type, setType] = useState<ResourceType | "">("")
-  const [uploading, setUploading] = useState(false)
-  const [ytUrl, setYtUrl] = useState("")
+  const [items, setItems] = useState<Resource[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [q, setQ] = useState("");
+  const [type, setType] = useState<ResourceType | "">("");
+  const [uploading, setUploading] = useState(false);
+  const [ytUrl, setYtUrl] = useState("");
   const [category, setCategory] = useState("");
   const [file, setFile] = useState<File | null>(null);
+
+  // Dialog states
+  const [resourceToDelete, setResourceToDelete] = useState<string | null>(null);
+  const [resourceToEdit, setResourceToEdit] = useState<Resource | null>(null);
+  const [editForm, setEditForm] = useState({
+    originalName: "",
+    categoryPath: "",
+    url: "",
+  });
 
   useEffect(() => {
     if (isAuthed) load(page);
@@ -62,7 +81,11 @@ export default function ResourcesPage() {
         setItems(json.data || []);
         setPage(json.page || 1);
         setTotalPages(json.totalPages || 1);
+      } else {
+        toast.error("Erro ao carregar recursos");
       }
+    } catch {
+      toast.error("Erro de conexão");
     } finally {
       setLoading(false);
     }
@@ -75,13 +98,16 @@ export default function ResourcesPage() {
       try {
         const fd = new FormData();
         fd.append("file", file);
+        if (category) fd.append("categoryPath", category); // Optional if supported for files
         const res = await fetch("/api/resources", { method: "POST", body: fd });
         const j = await res.json().catch(() => ({}));
         if (!res.ok) throw new Error(String(j.message || "Falha no upload"));
+        toast.success("Arquivo enviado com sucesso");
         await load(page);
         setFile(null);
-      } catch (e) {
+      } catch (e: any) {
         console.error("resources_ui_upload_error", e);
+        toast.error(e.message || "Erro ao enviar arquivo");
       } finally {
         setUploading(false);
       }
@@ -100,37 +126,72 @@ export default function ResourcesPage() {
       const j = await res.json().catch(() => ({}));
       if (!res.ok)
         throw new Error(String(j.message || "Falha ao cadastrar URL"));
+      toast.success("URL cadastrada com sucesso");
       await load(page);
       setYtUrl("");
-    } catch (e) {
+      // Don't clear category immediately as user might want to add multiple in same category
+    } catch (e: any) {
       console.error("resources_ui_youtube_error", e);
+      toast.error(e.message || "Erro ao cadastrar URL");
     } finally {
       setUploading(false);
     }
   };
 
-  const onDelete = async (id: string) => {
-    if (!canManage) return;
+  const confirmDelete = async () => {
+    if (!canManage || !resourceToDelete) return;
     try {
-      const res = await fetch(`/api/resources/${id}`, { method: "DELETE" });
-      if (res.ok) await load(page);
-    } catch {}
+      const res = await fetch(`/api/resources/${resourceToDelete}`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        toast.success("Recurso excluído com sucesso");
+        await load(page);
+      } else {
+        toast.error("Falha ao excluir recurso");
+      }
+    } catch {
+      toast.error("Erro ao tentar excluir");
+    } finally {
+      setResourceToDelete(null);
+    }
   };
 
-  const onUpdate = async (r: Resource) => {
-    if (!canManage) return;
-    const val = prompt(
-      r.type === "youtube" ? "Nova URL do YouTube" : "Novo nome original",
-      r.type === "youtube" ? r.path : r.originalName
-    );
-    if (val === null) return;
-    const body = r.type === "youtube" ? { url: val } : { originalName: val };
-    const res = await fetch(`/api/resources/${r.id}`, {
-      method: "PUT",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify(body),
+  const openEdit = (r: Resource) => {
+    setResourceToEdit(r);
+    setEditForm({
+      originalName: r.originalName,
+      categoryPath: r.categoryPath || "",
+      url: r.type === "youtube" ? r.path : "",
     });
-    if (res.ok) await load(page);
+  };
+
+  const saveEdit = async () => {
+    if (!canManage || !resourceToEdit) return;
+    try {
+      const body: any = {
+        originalName:
+          resourceToEdit.type !== "youtube" ? editForm.originalName : undefined,
+        categoryPath: editForm.categoryPath,
+        url: resourceToEdit.type === "youtube" ? editForm.url : undefined,
+      };
+
+      const res = await fetch(`/api/resources/${resourceToEdit.id}`, {
+        method: "PUT",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(body),
+      });
+
+      if (res.ok) {
+        toast.success("Recurso atualizado");
+        await load(page);
+        setResourceToEdit(null);
+      } else {
+        toast.error("Falha ao atualizar recurso");
+      }
+    } catch {
+      toast.error("Erro ao salvar alterações");
+    }
   };
 
   const columns: Column<Resource>[] = useMemo(
@@ -189,7 +250,7 @@ export default function ResourcesPage() {
               variant="outline"
               size="sm"
               className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600"
-              onClick={() => onUpdate(r)}
+              onClick={() => openEdit(r)}
             >
               Editar
             </Button>
@@ -197,7 +258,7 @@ export default function ResourcesPage() {
               variant="outline"
               size="sm"
               className="bg-red-700 border-red-600 text-white hover:bg-red-600"
-              onClick={() => onDelete(r.id)}
+              onClick={() => setResourceToDelete(r.id)}
             >
               Excluir
             </Button>
@@ -355,6 +416,87 @@ export default function ResourcesPage() {
           />
         </div>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={!!resourceToDelete}
+        onOpenChange={(o) => !o && setResourceToDelete(null)}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirmar Exclusão</DialogTitle>
+            <DialogDescription>
+              Tem certeza que deseja excluir este recurso? Esta ação não pode
+              ser desfeita.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setResourceToDelete(null)}>
+              Cancelar
+            </Button>
+            <Button variant="destructive" onClick={confirmDelete}>
+              Excluir
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Dialog */}
+      <Dialog
+        open={!!resourceToEdit}
+        onOpenChange={(o) => !o && setResourceToEdit(null)}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Editar Recurso</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col gap-4 py-4">
+            {resourceToEdit?.type !== "youtube" && (
+              <div>
+                <Label>Nome Original</Label>
+                <Input
+                  value={editForm.originalName}
+                  onChange={(e) =>
+                    setEditForm((prev) => ({
+                      ...prev,
+                      originalName: e.target.value,
+                    }))
+                  }
+                />
+              </div>
+            )}
+            {resourceToEdit?.type === "youtube" && (
+              <div>
+                <Label>URL</Label>
+                <Input
+                  value={editForm.url}
+                  onChange={(e) =>
+                    setEditForm((prev) => ({ ...prev, url: e.target.value }))
+                  }
+                />
+              </div>
+            )}
+            <div>
+              <Label>Categoria</Label>
+              <Input
+                value={editForm.categoryPath}
+                onChange={(e) =>
+                  setEditForm((prev) => ({
+                    ...prev,
+                    categoryPath: e.target.value,
+                  }))
+                }
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setResourceToEdit(null)}>
+              Cancelar
+            </Button>
+            <Button onClick={saveEdit}>Salvar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </main>
   );
 }

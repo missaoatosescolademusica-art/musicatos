@@ -62,7 +62,14 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
 
     if (existing.type === "pdf" || existing.type === "mp3") {
       const abs = absoluteFromRelative(existing.path)
-      try { if (fs.existsSync(abs)) fs.unlinkSync(abs) } catch {}
+      try {
+        if (fs.existsSync(abs)) {
+          fs.unlinkSync(abs);
+        }
+      } catch (err) {
+        console.error(`Failed to delete file ${abs}:`, err);
+        // Continue to delete DB record even if file deletion fails
+      }
     }
 
     await prisma.resource.delete({ where: { id: params.id } })

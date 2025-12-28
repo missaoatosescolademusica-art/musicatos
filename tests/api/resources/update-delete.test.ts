@@ -28,17 +28,17 @@ describe("resources update and delete", () => {
     console.log("Resource ID:", id);
 
     console.log("Starting PUT...");
-    const put = await PUT(req(`http://localhost/api/resources/${id}`, "admin", { method: "PUT", headers: { "content-type": "application/json" }, body: JSON.stringify({ originalName: "novo.pdf" }) }), { params: { id } })
+    const put = await PUT(req(`http://localhost/api/resources/${id}`, "admin", { method: "PUT", headers: { "content-type": "application/json" }, body: JSON.stringify({ originalName: "novo.pdf" }) }), { params: Promise.resolve({ id }) })
     console.log("PUT status:", put.status);
     expect(put.status).toBe(200)
     
     console.log("Starting GET...");
-    const get = await GET(req(`http://localhost/api/resources/${id}`, "admin"), { params: { id } })
+    const get = await GET(req(`http://localhost/api/resources/${id}`, "admin"), { params: Promise.resolve({ id }) })
     const gj = await get.json()
     expect(gj.resource.originalName).toBe("novo.pdf")
 
     console.log("Starting DELETE...");
-    const del = await DELETE(req(`http://localhost/api/resources/${id}`, "admin", { method: "DELETE" }), { params: { id } })
+    const del = await DELETE(req(`http://localhost/api/resources/${id}`, "admin", { method: "DELETE" }), { params: Promise.resolve({ id }) })
     console.log("DELETE status:", del.status);
     expect(del.status).toBe(200)
   })

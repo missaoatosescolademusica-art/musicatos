@@ -50,7 +50,9 @@ describe("Resource API Error Handling", () => {
     });
 
     // The API should now handle the audit failure gracefully and return 200 OK
-    const res = await DELETE(req, { params: { id: resource.id } });
+    const res = await DELETE(req, {
+      params: Promise.resolve({ id: resource.id }),
+    });
     
     expect(res.status).toBe(200);
     const json = await res.json();

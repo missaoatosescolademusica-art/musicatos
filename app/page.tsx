@@ -23,6 +23,7 @@ function HomeContent() {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     fullName: "",
+    age: "",
     nameFather: "",
     nameMother: "",
     phone: "",
@@ -63,13 +64,13 @@ function HomeContent() {
 
     if (cleaned.length <= 12) {
       return `(${cleaned.slice(0, 2)}) ${cleaned.slice(2, 7)} - ${cleaned.slice(
-        7
+        7,
       )}`;
     }
 
     return `(${cleaned.slice(0, 2)}) ${cleaned.slice(2, 7)} - ${cleaned.slice(
       7,
-      12
+      12,
     )}`;
   };
 
@@ -78,19 +79,27 @@ function HomeContent() {
     setFormData({ ...formData, phone: formatted });
   };
 
-  //
+  const ageNumber = Number(formData.age);
+  const isMinor = !Number.isNaN(ageNumber) && ageNumber > 0 && ageNumber < 18;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    const parsedAge = Number(formData.age);
     if (
       !formData.fullName ||
-      !formData.nameFather ||
-      !formData.nameMother ||
       !formData.phone ||
-      !formData.address
+      !formData.address ||
+      !formData.age ||
+      Number.isNaN(parsedAge) ||
+      parsedAge <= 0
     ) {
-      toast.error("Por favor, preencha todos os campos obrigatórios");
+      toast.error("Informe nome, idade, telefone e endereço válidos");
+      return;
+    }
+
+    if (isMinor && (!formData.nameFather || !formData.nameMother)) {
+      toast.error("Para menores de 18 anos, informe o nome do pai e da mãe");
       return;
     }
 
@@ -116,6 +125,7 @@ function HomeContent() {
       toast.success("Estudante registrado com sucesso!");
       setFormData({
         fullName: "",
+        age: "",
         nameFather: "",
         nameMother: "",
         phone: "",
@@ -175,7 +185,6 @@ function HomeContent() {
               </div>
               <Card className="bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700 shadow-2xl">
                 <form onSubmit={handleSubmit} className="p-8 space-y-6">
-                  {/* Full Name */}
                   <div>
                     <Label
                       htmlFor="fullName"
@@ -194,41 +203,71 @@ function HomeContent() {
                     />
                   </div>
 
-                  {/* Pai e mãe */}
                   <div>
                     <Label
-                      htmlFor="nameFather"
+                      htmlFor="age"
                       className="text-slate-900 dark:text-slate-200 text-sm font-medium"
                     >
-                      Nome do pai
+                      Idade
                     </Label>
                     <Input
-                      id="nameFather"
-                      placeholder="João da silva sauro"
-                      value={formData.nameFather}
+                      id="age"
+                      type="number"
+                      placeholder="18"
+                      value={formData.age}
                       onChange={(e) =>
-                        setFormData({ ...formData, nameFather: e.target.value })
+                        setFormData({ ...formData, age: e.target.value })
                       }
                       className="mt-2 bg-slate-700 border-slate-600 text-white placeholder:text-slate-500 focus:border-blue-400"
+                      min={1}
+                      max={120}
                     />
                   </div>
-                  <div>
-                    <Label
-                      htmlFor="nameMother"
-                      className="text-slate-900 dark:text-slate-200 text-sm font-medium"
-                    >
-                      Nome da mãe
-                    </Label>
-                    <Input
-                      id="nameMother"
-                      placeholder="Joana da silva sauro"
-                      value={formData.nameMother}
-                      onChange={(e) =>
-                        setFormData({ ...formData, nameMother: e.target.value })
-                      }
-                      className="mt-2 bg-slate-700 border-slate-600 text-white placeholder:text-slate-500 focus:border-blue-400"
-                    />
-                  </div>
+
+                  {isMinor && (
+                    <>
+                      <div>
+                        <Label
+                          htmlFor="nameFather"
+                          className="text-slate-900 dark:text-slate-200 text-sm font-medium"
+                        >
+                          Nome do pai
+                        </Label>
+                        <Input
+                          id="nameFather"
+                          placeholder="João da silva sauro"
+                          value={formData.nameFather}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              nameFather: e.target.value,
+                            })
+                          }
+                          className="mt-2 bg-slate-700 border-slate-600 text-white placeholder:text-slate-500 focus:border-blue-400"
+                        />
+                      </div>
+                      <div>
+                        <Label
+                          htmlFor="nameMother"
+                          className="text-slate-900 dark:text-slate-200 text-sm font-medium"
+                        >
+                          Nome da mãe
+                        </Label>
+                        <Input
+                          id="nameMother"
+                          placeholder="Joana da silva sauro"
+                          value={formData.nameMother}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              nameMother: e.target.value,
+                            })
+                          }
+                          className="mt-2 bg-slate-700 border-slate-600 text-white placeholder:text-slate-500 focus:border-blue-400"
+                        />
+                      </div>
+                    </>
+                  )}
 
                   {/* Phone */}
                   <div>

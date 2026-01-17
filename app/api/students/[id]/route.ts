@@ -55,6 +55,16 @@ export async function PUT(request: NextRequest, context: { params: any }) {
     if (body.address !== undefined) data.address = body.address;
     if (body.instruments !== undefined) data.instruments = body.instruments;
     if (body.available !== undefined) data.available = body.available;
+    if (body.age !== undefined) {
+      const parsed = Number(body.age);
+      if (!Number.isInteger(parsed) || parsed <= 0 || parsed > 120) {
+        return NextResponse.json(
+          { message: "Idade inválida" },
+          { status: 400 }
+        );
+      }
+      data.age = parsed;
+    }
 
     if (Object.keys(data).length === 0) {
       return NextResponse.json(

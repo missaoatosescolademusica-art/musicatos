@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/db"
+import { prisma } from "@/lib/db";
 import { getAuthInfo } from "@/lib/auth";
 import { Prisma } from "@prisma/client";
 import { type NextRequest, NextResponse } from "next/server";
@@ -52,7 +52,7 @@ export async function GET(request: NextRequest) {
     console.error("Error fetching students:", error);
     return NextResponse.json(
       { message: "Erro ao buscar estudantes" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -75,13 +75,24 @@ export async function POST(request: NextRequest) {
       address,
       instruments,
       available,
+      age,
     } = body;
 
-    // Validate required fields
+    const ageRaw = age;
+    let ageValue: number | null = null;
+    if (ageRaw !== undefined && ageRaw !== null && ageRaw !== "") {
+      const parsed = typeof ageRaw === "number" ? ageRaw : Number(ageRaw);
+      if (!Number.isInteger(parsed) || parsed <= 0 || parsed > 120) {
+        return NextResponse.json(
+          { message: "Idade inválida" },
+          { status: 400 },
+        );
+      }
+      ageValue = parsed;
+    }
+
     if (
       !fullName ||
-      !nameFather ||
-      !nameMother ||
       !phone ||
       !address ||
       !instruments ||
@@ -89,7 +100,7 @@ export async function POST(request: NextRequest) {
     ) {
       return NextResponse.json(
         { message: "Todos os campos são obrigatórios" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -100,6 +111,7 @@ export async function POST(request: NextRequest) {
       phone,
       address,
       instruments,
+      age: ageValue,
     });
 
     // Create new student
@@ -112,6 +124,7 @@ export async function POST(request: NextRequest) {
         address,
         instruments,
         available,
+        age: ageValue,
       },
     });
 
@@ -120,14 +133,14 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error(
       "[v0] Error creating student:",
-      error instanceof Error ? error.message : String(error)
+      error instanceof Error ? error.message : String(error),
     );
     return NextResponse.json(
       {
         message: "Erro ao criar estudante",
         error: error instanceof Error ? error.message : "Unknown error",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

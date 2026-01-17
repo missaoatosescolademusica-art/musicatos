@@ -1,9 +1,10 @@
 export interface Student {
   id: string;
   fullName: string;
-  nameFather: string;
-  nameMother: string;
+  nameFather: string | null;
+  nameMother: string | null;
   phone: string;
+  age?: number | null;
   address: string;
   instruments: string[];
   available: boolean;

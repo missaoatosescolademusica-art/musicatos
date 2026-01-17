@@ -13,9 +13,10 @@ datasource db {
 model Student {
   id          String   @id @default(cuid())
   fullName    String
-  nameFather  String
-  nameMother  String
+  nameFather  String?
+  nameMother  String?
   phone       String
+  age         Int?
   address     String
   instruments String[] // Array of instruments
   available   Boolean  @default(true)

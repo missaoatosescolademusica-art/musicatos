@@ -1,27 +1,22 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState, useEffect } from "react"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Checkbox } from "@/components/ui/checkbox"
+import { useState, useEffect } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Student } from "@/app/types/students";
 
-const INSTRUMENTS = ["Violão", "Canto", "Teclado", "Bateria"]
-
-interface Student {
-  id: string;
-  fullName: string;
-  nameFather: string;
-  nameMother: string;
-  phone: string;
-  address: string;
-  instruments: string[];
-  available: boolean;
-  createdAt: string;
-}
+const INSTRUMENTS = ["Violão", "Canto", "Teclado", "Bateria"];
 
 interface StudentDialogProps {
   open: boolean;
@@ -38,6 +33,9 @@ export function StudentDialog({
   mode,
   onSave,
 }: StudentDialogProps) {
+  // Estado local para o formulário.
+  // Usamos um tipo auxiliar para permitir que os campos sejam manipulados como strings no formulário,
+  // mesmo que venham como null do banco.
   const [formData, setFormData] = useState<Omit<Student, "id" | "createdAt">>({
     fullName: "",
     nameFather: "",
@@ -46,6 +44,7 @@ export function StudentDialog({
     address: "",
     instruments: [],
     available: true,
+    age: null,
   });
   const [saving, setSaving] = useState(false);
 
@@ -53,13 +52,17 @@ export function StudentDialog({
     if (student) {
       setFormData({
         fullName: student.fullName,
-        nameFather: student.nameFather,
-        nameMother: student.nameMother,
+        nameFather: student.nameFather || "",
+        nameMother: student.nameMother || "",
         phone: student.phone,
         address: student.address,
         instruments: student.instruments,
         available: student.available,
+        age: student.age || null,
       });
+    } else {
+      // Reset form when opening for creation (if passing null student implies creation, though props say view/edit)
+      // Or just ensure defaults are clean
     }
   }, [student, open]);
 
@@ -85,13 +88,13 @@ export function StudentDialog({
 
     if (cleaned.length <= 12) {
       return `(${cleaned.slice(0, 2)}) ${cleaned.slice(2, 7)} - ${cleaned.slice(
-        7
+        7,
       )}`;
     }
 
     return `(${cleaned.slice(0, 2)}) ${cleaned.slice(2, 7)} - ${cleaned.slice(
       7,
-      12
+      12,
     )}`;
   };
 
@@ -136,7 +139,7 @@ export function StudentDialog({
               Nome do Pai
             </Label>
             <Input
-              value={formData.nameFather}
+              value={formData.nameFather || ""}
               onChange={(e) =>
                 setFormData({ ...formData, nameFather: e.target.value })
               }
@@ -151,7 +154,7 @@ export function StudentDialog({
               Nome da Mãe
             </Label>
             <Input
-              value={formData.nameMother}
+              value={formData.nameMother || ""}
               onChange={(e) =>
                 setFormData({ ...formData, nameMother: e.target.value })
               }

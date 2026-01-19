@@ -1,55 +1,68 @@
-import { NextRequest, NextResponse } from "next/server"
-import { prisma } from "@/lib/db"
-import { getAuthInfo } from "@/lib/auth"
-import fs from "fs"
-import path from "path"
-import { Prisma } from "@prisma/client"
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/db";
+import { getAuthInfo } from "@/lib/auth";
+import fs from "fs";
+import path from "path";
+import { Prisma } from "@prisma/client";
+import { deleteFromTebi } from "@/lib/tebi";
 
 function ensureAuthRole(role: string | undefined) {
-  return role === "admin" || role === "professor"
+  return role === "admin" || role === "professor";
 }
 
 function absoluteFromRelative(rel: string) {
-  const safeRel = rel.startsWith("/") ? rel.slice(1) : rel
-  return path.join(process.cwd(), "public", safeRel)
+  const safeRel = rel.startsWith("/") ? rel.slice(1) : rel;
+  return path.join(process.cwd(), "public", safeRel);
 }
 
 async function safeAudit(data: any) {
   try {
-    await prisma.auditLog.create({ data })
+    await prisma.auditLog.create({ data });
   } catch (error) {
-    console.error("Audit log failed:", error)
+    console.error("Audit log failed:", error);
     // Non-blocking failure for audit
   }
 }
 
 function handleApiError(error: any, context: string) {
-  console.error(context, error)
-  
+  console.error(context, error);
+
   if (error instanceof Prisma.PrismaClientKnownRequestError) {
     // P2002: Unique constraint failed
     if (error.code === "P2002") {
-      return NextResponse.json({ message: "Dados duplicados" }, { status: 409 })
+      return NextResponse.json(
+        { message: "Dados duplicados" },
+        { status: 409 },
+      );
     }
     // P2003: Foreign key constraint failed
     if (error.code === "P2003") {
-      return NextResponse.json({ message: "Violação de integridade (chave estrangeira)" }, { status: 400 })
+      return NextResponse.json(
+        { message: "Violação de integridade (chave estrangeira)" },
+        { status: 400 },
+      );
     }
     // P2025: Record not found
     if (error.code === "P2025") {
-      return NextResponse.json({ message: "Registro não encontrado" }, { status: 404 })
+      return NextResponse.json(
+        { message: "Registro não encontrado" },
+        { status: 404 },
+      );
     }
   }
 
   return NextResponse.json(
-    { message: "Erro interno no servidor", details: error instanceof Error ? error.message : String(error) }, 
-    { status: 500 }
-  )
+    {
+      message: "Erro interno no servidor",
+      details: error instanceof Error ? error.message : String(error),
+    },
+    { status: 500 },
+  );
 }
 
 export async function GET(
   _request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const { id } = await params;
@@ -68,7 +81,7 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const auth = await getAuthInfo(request);
@@ -98,7 +111,7 @@ export async function PUT(
       ) {
         return NextResponse.json(
           { message: "URL do YouTube inválida" },
-          { status: 400 }
+          { status: 400 },
         );
       }
       updates.path = url;
@@ -107,7 +120,7 @@ export async function PUT(
     if (Object.keys(updates).length === 0)
       return NextResponse.json(
         { message: "Nada a atualizar" },
-        { status: 400 }
+        { status: 400 },
       );
 
     const updated = await prisma.resource.update({
@@ -135,7 +148,7 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const auth = await getAuthInfo(request);
@@ -147,7 +160,15 @@ export async function DELETE(
     if (!existing)
       return NextResponse.json({ message: "Não encontrado" }, { status: 404 });
 
-    if (existing.type === "pdf" || existing.type === "mp3") {
+    // Cloud deletion
+    if (existing.tebiId) {
+      await deleteFromTebi(existing.tebiId);
+    }
+    // Legacy local deletion
+    else if (
+      (existing.type === "pdf" || existing.type === "mp3") &&
+      !existing.path.startsWith("http")
+    ) {
       const abs = absoluteFromRelative(existing.path);
       try {
         if (fs.existsSync(abs)) {
@@ -155,7 +176,7 @@ export async function DELETE(
         }
       } catch (err) {
         console.error(`Failed to delete file ${abs}:`, err);
-        // Continue to delete DB record even if file deletion fails
+        // Continue to delete DB record
       }
     }
 

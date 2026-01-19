@@ -11,6 +11,7 @@ import { useAuth } from "./contexts/auth-context";
 
 import { StudentDialog } from "@/components/student-dialog";
 import SearchBar from "@/components/search/SearchBar";
+import { ImportStudentsButton } from "./components/ImportStudentsButton";
 import DataTable from "@/components/shared/DataTable";
 import { ActionsDataTable } from "@/components/shared/ActionsDataTable";
 import { Student } from "../types/students";
@@ -48,7 +49,6 @@ function DashboardContent() {
   } = useStudents();
   const { me } = useAuth();
 
-
   const itemsPerPage = 10;
 
   useEffect(() => {
@@ -59,8 +59,6 @@ function DashboardContent() {
   const isProfessor = me?.role === "professor";
   const [instrumentFilter, setInstrumentFilter] = React.useState("");
   const [availableFilter, setAvailableFilter] = React.useState("");
-
-  
 
   return (
     <main
@@ -88,6 +86,12 @@ function DashboardContent() {
             Gerencie todos os alunos registrados
           </p>
         </div>
+
+        {isAdmin && (
+          <div className="flex justify-end mb-4">
+            <ImportStudentsButton onSuccess={fetchStudents} />
+          </div>
+        )}
 
         <SearchBar placeholder="Buscar por ID do estudante..." />
 
@@ -122,7 +126,9 @@ function DashboardContent() {
               ? students.filter((s) => {
                   const iok = instrumentFilter
                     ? s.instruments.some((i) =>
-                        i.toLowerCase().includes(instrumentFilter.toLowerCase())
+                        i
+                          .toLowerCase()
+                          .includes(instrumentFilter.toLowerCase()),
                       )
                     : true;
                   const aok = availableFilter

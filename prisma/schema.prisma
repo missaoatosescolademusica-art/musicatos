@@ -172,6 +172,8 @@ model Resource {
   categoryPath String
   originalName String
   size         BigInt?
+  tebiId       String?
+  tebiUrl      String?
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
   createdById  String

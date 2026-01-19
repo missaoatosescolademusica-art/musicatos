@@ -1,11 +1,11 @@
-"use client"
-import { useEffect, useMemo, useState } from "react"
-import { useAuth } from "@/app/dashboard/contexts/auth-context"
-import DataTable, { Column } from "@/components/shared/DataTable"
-import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+"use client";
+import { useEffect, useMemo, useState } from "react";
+import { useAuth } from "@/app/dashboard/contexts/auth-context";
+import DataTable, { Column } from "@/components/shared/DataTable";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Dialog,
   DialogContent,
@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 
-type ResourceType = "pdf" | "mp3" | "youtube"
+type ResourceType = "pdf" | "mp3" | "youtube";
 type Resource = {
   id: string;
   type: ResourceType;
@@ -28,12 +28,16 @@ type Resource = {
 };
 
 function formatBytes(b?: string | number | null) {
-  const n = typeof b === "string" ? Number(b) : (b || 0)
-  if (!n) return "-"
-  const units = ["B","KB","MB","GB"]
-  let i = 0; let x = n
-  while (x >= 1024 && i < units.length - 1) { x /= 1024; i++ }
-  return `${x.toFixed(1)} ${units[i]}`
+  const n = typeof b === "string" ? Number(b) : b || 0;
+  if (!n) return "-";
+  const units = ["B", "KB", "MB", "GB"];
+  let i = 0;
+  let x = n;
+  while (x >= 1024 && i < units.length - 1) {
+    x /= 1024;
+    i++;
+  }
+  return `${x.toFixed(1)} ${units[i]}`;
 }
 
 export default function ResourcesPage() {
@@ -204,8 +208,8 @@ export default function ResourcesPage() {
               r.type === "pdf"
                 ? "bg-slate-700 text-slate-100 px-2 py-1 rounded"
                 : r.type === "mp3"
-                ? "bg-green-700 text-white px-2 py-1 rounded"
-                : "bg-red-700 text-white px-2 py-1 rounded"
+                  ? "bg-green-700 text-white px-2 py-1 rounded"
+                  : "bg-red-700 text-white px-2 py-1 rounded"
             }
           >
             {r.type.toUpperCase()}
@@ -219,7 +223,14 @@ export default function ResourcesPage() {
       {
         header: "Caminho/URL",
         render: (r) => (
-          <span className="text-slate-400 break-all">{r.path}</span>
+          <a
+            href={r.path}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-400 hover:underline break-all"
+          >
+            {r.path}
+          </a>
         ),
       },
       {
@@ -266,7 +277,7 @@ export default function ResourcesPage() {
         ),
       },
     ],
-    [page]
+    [page],
   );
 
   return (
@@ -340,7 +351,7 @@ export default function ResourcesPage() {
                 Upload de PDF/MP3
               </h2>
               <p className="text-slate-400 text-sm">
-                Tipos permitidos: PDF, MP3. Máx: 10MB.
+                Tipos permitidos: PDF, MP3. Máx: 100MB.
               </p>
               <input
                 type="file"

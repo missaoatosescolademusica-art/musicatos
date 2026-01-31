@@ -75,10 +75,10 @@ export default function DataTable<T>({
   pageSize,
   onPageChange,
   onRowClick,
-  containerClassName = "bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700 overflow-hidden shadow-xl",
+  containerClassName = "bg-card border-border overflow-hidden shadow-xl",
   tableClassName,
-  headerRowClassName = "bg-slate-100 dark:bg-slate-800",
-  bodyRowClassName = "border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700 transition",
+  headerRowClassName = "bg-muted/50",
+  bodyRowClassName = "border-border hover:bg-muted/50 transition",
   extraTopRight,
 }: DataTableProps<T>) {
   return (
@@ -86,13 +86,13 @@ export default function DataTable<T>({
       <div className="overflow-x-auto">
         <Table className={tableClassName}>
           <TableHeader className={headerRowClassName}>
-            <TableRow className="border-slate-300 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700">
+            <TableRow className="border-border hover:bg-muted/50">
               {columns.map((col, idx) => (
                 <TableHead
                   key={idx}
                   className={
                     col.headerClassName ??
-                    "text-slate-100 dark:text-slate-300 font-semibold"
+                    "text-muted-foreground font-semibold"
                   }
                 >
                   {col.header}
@@ -105,7 +105,7 @@ export default function DataTable<T>({
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
-                  className="text-center py-8 text-slate-800 dark:text-slate-400"
+                  className="text-center py-8 text-muted-foreground"
                 >
                   Carregando...
                 </TableCell>
@@ -114,7 +114,7 @@ export default function DataTable<T>({
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
-                  className="text-center py-8 text-slate-800 dark:text-slate-400"
+                  className="text-center py-8 text-muted-foreground"
                 >
                   {emptyMessage}
                 </TableCell>
@@ -130,7 +130,7 @@ export default function DataTable<T>({
                     <TableCell
                       key={idx}
                       className={
-                        col.cellClassName ?? "text-slate-900 dark:text-white"
+                        col.cellClassName ?? "text-foreground"
                       }
                     >
                       {col.render(item)}
@@ -143,8 +143,8 @@ export default function DataTable<T>({
         </Table>
       </div>
 
-      <div className="bg-slate-200 dark:bg-slate-700 px-6 py-4 flex items-center justify-between border-t border-slate-300 dark:border-slate-600">
-        <p className="text-slate-800 dark:text-slate-400 text-sm">
+      <div className="bg-muted border-t border-border px-6 py-4 flex items-center justify-between">
+        <p className="text-muted-foreground text-sm">
           Página {currentPage} de {totalPages || 1}
           {pageSize ? ` • ${data.length} / ${pageSize} itens` : ""}
         </p>
@@ -155,7 +155,7 @@ export default function DataTable<T>({
             size="sm"
             onClick={() => onPageChange(Math.max(1, currentPage - 1))}
             disabled={currentPage === 1}
-            className="bg-slate-600 border-slate-500 text-slate-200 hover:bg-slate-500"
+            className="border-border hover:bg-muted"
           >
             Anterior
           </Button>
@@ -164,7 +164,7 @@ export default function DataTable<T>({
             size="sm"
             onClick={() => onPageChange(currentPage + 1)}
             disabled={currentPage >= totalPages}
-            className="bg-slate-600 border-slate-500 text-slate-200 hover:bg-slate-500"
+            className="border-border hover:bg-muted"
           >
             Próxima
           </Button>

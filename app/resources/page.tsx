@@ -218,7 +218,7 @@ export default function ResourcesPage() {
       },
       {
         header: "Nome",
-        render: (r) => <span className="text-slate-200">{r.originalName}</span>,
+        render: (r) => <span className="text-foreground">{r.originalName}</span>,
       },
       {
         header: "Caminho/URL",
@@ -227,7 +227,7 @@ export default function ResourcesPage() {
             href={r.path}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-blue-400 hover:underline break-all"
+            className="text-primary hover:underline break-all"
           >
             {r.path}
           </a>
@@ -236,19 +236,19 @@ export default function ResourcesPage() {
       {
         header: "Categoria Youtube",
         render: (r) => (
-          <span className="text-slate-400 break-all">{r.categoryPath}</span>
+          <span className="text-muted-foreground break-all">{r.categoryPath}</span>
         ),
       },
       {
         header: "Tamanho",
         render: (r) => (
-          <span className="text-slate-300">{formatBytes(r.size as any)}</span>
+          <span className="text-muted-foreground">{formatBytes(r.size as any)}</span>
         ),
       },
       {
         header: "Criado em",
         render: (r) => (
-          <span className="text-slate-300">
+          <span className="text-muted-foreground">
             {r.createdAt ? new Date(r.createdAt).toLocaleString() : "-"}
           </span>
         ),
@@ -260,7 +260,7 @@ export default function ResourcesPage() {
             <Button
               variant="outline"
               size="sm"
-              className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600"
+              className="bg-secondary border-secondary text-secondary-foreground hover:bg-secondary/80"
               onClick={() => openEdit(r)}
             >
               Editar
@@ -268,7 +268,7 @@ export default function ResourcesPage() {
             <Button
               variant="outline"
               size="sm"
-              className="bg-red-700 border-red-600 text-white hover:bg-red-600"
+              className="bg-destructive border-destructive text-destructive-foreground hover:bg-destructive/90"
               onClick={() => setResourceToDelete(r.id)}
             >
               Excluir
@@ -283,26 +283,26 @@ export default function ResourcesPage() {
   return (
     <main className="flex-1 w-full min-h-[calc(100vh-3.5rem)] px-4 py-10">
       <div className="max-w-5xl mx-auto">
-        <h1 className="mt-4 text-2xl md:text-3xl font-semibold text-slate-900 dark:text-slate-300 text-center">
+        <h1 className="mt-4 text-2xl md:text-3xl font-semibold text-foreground text-center">
           Recursos (PDF, MP3, YouTube)
         </h1>
         {!canManage && (
-          <p className="text-center text-slate-500 dark:text-slate-400 mt-2">
+          <p className="text-center text-muted-foreground mt-2">
             Acesso restrito a professores e administradores.
           </p>
         )}
 
         {canManage && (
-          <div className="mt-6 bg-slate-800 border border-slate-700 rounded p-4 grid grid-cols-1 md:grid-cols-3 gap-3 items-end">
+          <div className="mt-6 bg-card border border-border rounded p-4 grid grid-cols-1 md:grid-cols-3 gap-3 items-end">
             <div>
-              <Label htmlFor="type" className="text-slate-300">
+              <Label htmlFor="type" className="text-muted-foreground">
                 Tipo
               </Label>
               <select
                 id="type"
                 value={type}
                 onChange={(e) => setType(e.target.value as any)}
-                className="bg-slate-700 border-slate-600 text-white rounded p-2 w-full"
+                className="bg-input border-input text-foreground rounded p-2 w-full"
               >
                 <option value="">Todos</option>
                 <option value="pdf">PDF</option>
@@ -311,7 +311,7 @@ export default function ResourcesPage() {
               </select>
             </div>
             <div>
-              <Label htmlFor="q" className="text-slate-300">
+              <Label htmlFor="q" className="text-muted-foreground">
                 Buscar
               </Label>
               <Input
@@ -319,13 +319,13 @@ export default function ResourcesPage() {
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
                 placeholder="Nome ou caminho"
-                className="bg-slate-700 border-slate-600 text-white"
+                className="bg-input border-input text-foreground"
               />
             </div>
             <div className="flex gap-2">
               <Button
                 onClick={() => load(1)}
-                className="bg-blue-600 hover:bg-blue-700"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground"
               >
                 Filtrar
               </Button>
@@ -336,7 +336,7 @@ export default function ResourcesPage() {
                   setQ("");
                   load(1);
                 }}
-                className="bg-slate-700 border-slate-600 text-white hover:bg-slate-600"
+                className="bg-secondary border-secondary text-secondary-foreground hover:bg-secondary/80"
               >
                 Limpar
               </Button>
@@ -345,42 +345,42 @@ export default function ResourcesPage() {
         )}
 
         {canManage && (
-          <div className="mt-4 bg-slate-800 border border-slate-700 rounded p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Card className="bg-slate-900 border-slate-700 p-4">
-              <h2 className="text-slate-200 font-semibold">
+          <div className="mt-4 bg-card border border-border rounded p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Card className="bg-muted/30 border-border p-4">
+              <h2 className="text-foreground font-semibold">
                 Upload de PDF/MP3
               </h2>
-              <p className="text-slate-400 text-sm">
+              <p className="text-muted-foreground text-sm">
                 Tipos permitidos: PDF, MP3. Máx: 100MB.
               </p>
               <input
                 type="file"
                 onChange={(e) => setFile(e.target.files?.[0] || null)}
                 accept="application/pdf,audio/mpeg"
-                className="mt-2 text-slate-300"
+                className="mt-2 text-muted-foreground"
                 aria-label="Selecionar arquivo"
               />
               <div className="mt-3 flex gap-2">
                 <Button
                   onClick={onUpload}
                   disabled={!file || uploading}
-                  className="bg-green-600 hover:bg-green-700"
+                  className="bg-green-600 hover:bg-green-700 text-white"
                 >
                   Enviar
                 </Button>
                 {file && (
-                  <span className="text-slate-400 text-sm">
+                  <span className="text-muted-foreground text-sm">
                     {file.name} • {formatBytes(file.size)}
                   </span>
                 )}
               </div>
             </Card>
 
-            <Card className="bg-slate-900 border-slate-700 p-4">
-              <h2 className="text-slate-200 font-semibold">
+            <Card className="bg-muted/30 border-border p-4">
+              <h2 className="text-foreground font-semibold">
                 Cadastrar URL do YouTube
               </h2>
-              <p className="text-slate-400 text-sm">
+              <p className="text-muted-foreground text-sm">
                 Ex.: https://www.youtube.com/watch?v=dQw4w9WgXcQ
               </p>
               <div className="flex flex-col gap-3 mt-2">
@@ -388,15 +388,16 @@ export default function ResourcesPage() {
                   value={ytUrl}
                   onChange={(e) => setYtUrl(e.target.value)}
                   placeholder="URL do vídeo"
-                  className="bg-slate-700 border-slate-600 text-white"
+                  className="bg-input border-input text-foreground"
                   aria-label="URL do YouTube"
                 />
                 <Input
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
                   placeholder="Categoria (ex: Violão Clássico)"
-                  className="bg-slate-700 border-slate-600 text-white"
+                  className="bg-input border-input text-foreground"
                   aria-label="Categoria da URL do YouTube"
+
                 />
               </div>
               <div className="mt-3">

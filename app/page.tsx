@@ -153,7 +153,7 @@ function HomeContent() {
         backgroundRepeat: "no-repeat",
       }}
     >
-      <div className="absolute inset-0 bg-gradient-to-br from-gray-50/70 via-gray-100/70 to-gray-200/70 dark:from-slate-900/70 dark:via-slate-800/70 dark:to-slate-900/70 pointer-events-none" />
+      <div className="absolute inset-0 bg-background/70 backdrop-blur-sm pointer-events-none" />
       <div className="relative z-10">
         <div className="flex">
           <main
@@ -172,23 +172,23 @@ function HomeContent() {
                     className="rounded-full w-1/2 mr-3 mt-10 mb-10"
                   />
                   <div className="flex items-center">
-                    <Music className="h-10 w-10 text-blue-400 mr-3" />
-                    <h1 className="text-4xl font-bold text-slate-900 dark:text-white">
+                    <Music className="h-10 w-10 text-primary mr-3" />
+                    <h1 className="text-4xl font-bold text-foreground">
                       Registro de Aluno
                     </h1>
                   </div>
                 </div>
-                <p className="text-slate-800 dark:text-slate-400 text-lg">
+                <p className="text-muted-foreground text-lg">
                   Preencha o formulário abaixo para se inscrever na escola de
                   música
                 </p>
               </div>
-              <Card className="bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700 shadow-2xl">
+              <Card className="bg-card border-border shadow-2xl">
                 <form onSubmit={handleSubmit} className="p-8 space-y-6">
                   <div>
                     <Label
                       htmlFor="fullName"
-                      className="text-slate-900 dark:text-slate-200 text-sm font-medium"
+                      className="text-foreground text-sm font-medium"
                     >
                       Nome Completo
                     </Label>
@@ -199,14 +199,13 @@ function HomeContent() {
                       onChange={(e) =>
                         setFormData({ ...formData, fullName: e.target.value })
                       }
-                      className="mt-2 bg-slate-700 border-slate-600 text-white placeholder:text-slate-500 focus:border-blue-400"
+                      className="bg-input border-input text-foreground"
                     />
                   </div>
-
-                  <div>
+                  <div className="mt-2 bg-slate-700 border-slate-600 text-white placeholder:text-slate-500 focus:border-blue-400">
                     <Label
                       htmlFor="age"
-                      className="text-slate-900 dark:text-slate-200 text-sm font-medium"
+                      className="text-foreground text-sm font-medium"
                     >
                       Idade
                     </Label>
@@ -218,7 +217,7 @@ function HomeContent() {
                       onChange={(e) =>
                         setFormData({ ...formData, age: e.target.value })
                       }
-                      className="mt-2 bg-slate-700 border-slate-600 text-white placeholder:text-slate-500 focus:border-blue-400"
+                      className="mt-2 bg-input border-input text-foreground placeholder:text-muted-foreground focus:border-primary"
                       min={1}
                       max={120}
                     />
@@ -229,7 +228,7 @@ function HomeContent() {
                       <div>
                         <Label
                           htmlFor="nameFather"
-                          className="text-slate-900 dark:text-slate-200 text-sm font-medium"
+                          className="text-foreground text-sm font-medium"
                         >
                           Nome do pai
                         </Label>
@@ -243,13 +242,13 @@ function HomeContent() {
                               nameFather: e.target.value,
                             })
                           }
-                          className="mt-2 bg-slate-700 border-slate-600 text-white placeholder:text-slate-500 focus:border-blue-400"
+                          className="mt-2 bg-input border-input text-foreground placeholder:text-muted-foreground focus:border-primary"
                         />
                       </div>
                       <div>
                         <Label
                           htmlFor="nameMother"
-                          className="text-slate-900 dark:text-slate-200 text-sm font-medium"
+                          className="text-foreground text-sm font-medium"
                         >
                           Nome da mãe
                         </Label>
@@ -263,7 +262,7 @@ function HomeContent() {
                               nameMother: e.target.value,
                             })
                           }
-                          className="mt-2 bg-slate-700 border-slate-600 text-white placeholder:text-slate-500 focus:border-blue-400"
+                          className="mt-2 bg-input border-input text-foreground placeholder:text-muted-foreground focus:border-primary"
                         />
                       </div>
                     </>
@@ -273,7 +272,7 @@ function HomeContent() {
                   <div>
                     <Label
                       htmlFor="phone"
-                      className="text-slate-900 dark:text-slate-200 text-sm font-medium"
+                      className="text-foreground text-sm font-medium"
                     >
                       WhatsApp
                     </Label>
@@ -282,7 +281,7 @@ function HomeContent() {
                       placeholder="(00) 00000 - 0000"
                       value={formData.phone}
                       onChange={handlePhoneChange}
-                      className="mt-2 bg-slate-700 border-slate-600 text-white placeholder:text-slate-500 focus:border-blue-400"
+                      className="mt-2 bg-input border-input text-foreground placeholder:text-muted-foreground focus:border-primary"
                       maxLength={17}
                     />
                   </div>
@@ -291,7 +290,7 @@ function HomeContent() {
                   <div>
                     <Label
                       htmlFor="address"
-                      className="text-slate-900 dark:text-slate-200 text-sm font-medium"
+                      className="text-foreground text-sm font-medium"
                     >
                       Endereço
                     </Label>
@@ -302,13 +301,13 @@ function HomeContent() {
                       onChange={(e) =>
                         setFormData({ ...formData, address: e.target.value })
                       }
-                      className="mt-2 bg-slate-700 border-slate-600 text-white placeholder:text-slate-500 focus:border-blue-400"
+                      className="mt-2 bg-input border-input text-foreground placeholder:text-muted-foreground focus:border-primary"
                     />
                   </div>
 
                   {/* Instruments */}
                   <div>
-                    <Label className="text-slate-900 dark:text-slate-200 text-sm font-medium">
+                    <Label className="text-foreground text-sm font-medium">
                       Instrumentos
                     </Label>
                     <select
@@ -319,7 +318,7 @@ function HomeContent() {
                           instruments: e.target.value ? [e.target.value] : [],
                         })
                       }
-                      className="bg-slate-700 border border-slate-600 text-white mt-1 rounded p-2 w-full"
+                      className="bg-input border border-input text-foreground mt-1 rounded p-2 w-full"
                     >
                       <option value="">Selecione um instrumento</option>
                       {INSTRUMENTS.map((opt) => (
@@ -341,11 +340,11 @@ function HomeContent() {
                           available: checked as boolean,
                         })
                       }
-                      className="border-slate-600 bg-slate-700"
+                      className="border-input bg-input"
                     />
                     <Label
                       htmlFor="available"
-                      className="text-slate-900 dark:text-slate-300 font-normal cursor-pointer"
+                      className="text-foreground font-normal cursor-pointer"
                     >
                       Disponível para aulas
                     </Label>
@@ -355,13 +354,14 @@ function HomeContent() {
                   <Button
                     type="submit"
                     disabled={loading}
-                    className="w-full mt-8 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200"
+                    className="w-full mt-8 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-2 px-4 rounded-lg transition duration-200"
                   >
                     {loading ? "Registrando..." : "Registrar Estudante"}
                   </Button>
                 </form>
               </Card>
-              <p className="text-center text-slate-800 dark:text-slate-400 p-5 text-sm mt-6">
+
+              <p className="text-center text-muted-foreground p-5 text-sm mt-6">
                 Os dados serão enviados com segurança para o nosso banco de
                 dados.
               </p>

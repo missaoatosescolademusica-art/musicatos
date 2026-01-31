@@ -57,7 +57,7 @@ export default function LoginPage() {
 
   return (
     <div
-      className="min-h-screen relative text-white"
+      className="min-h-screen relative text-foreground flex items-center justify-center"
       style={{
         backgroundImage: "url('/fundo-musical-login.png')",
         backgroundSize: "cover",
@@ -65,9 +65,9 @@ export default function LoginPage() {
         backgroundRepeat: "no-repeat",
       }}
     >
-      <div className="absolute inset-0 bg-gradient-to-br from-gray-50/70 via-gray-100/70 to-gray-200/70 dark:from-slate-900/70 dark:via-slate-800/70 dark:to-slate-900/70 pointer-events-none" />
-      <div className="relative z-10 flex items-center justify-center p-4">
-        <div className="w-full max-w-md bg-slate-800 border border-slate-700 rounded-lg p-6 space-y-4">
+      <div className="absolute inset-0 bg-background/80 dark:bg-background/90 backdrop-blur-sm pointer-events-none" />
+      <div className="relative z-10 w-full max-w-md p-4">
+        <div className="bg-card border border-border rounded-lg p-6 space-y-4 shadow-xl">
           <Image
             src="/Logo.jpg"
             alt="Logo"
@@ -75,32 +75,32 @@ export default function LoginPage() {
             height={128}
             className="mx-auto rounded-full"
           />
-          <div className="flex items-center gap-2 mb-2">
-            <LogIn className="h-6 w-6 text-blue-400" />
-            <h1 className="text-xl font-semibold pb-2">Entrar</h1>
+          <div className="flex items-center gap-2 mb-2 justify-center">
+            <LogIn className="h-6 w-6 text-primary" />
+            <h1 className="text-xl font-semibold">Entrar</h1>
           </div>
           <div>
-            <Label className="text-slate-300">Email</Label>
+            <Label className="text-muted-foreground">Email</Label>
             <Input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="bg-slate-700 border-slate-600 text-white mt-1"
+              className="bg-input border-input text-foreground mt-1"
             />
           </div>
           <div>
-            <Label className="text-slate-300">Senha</Label>
+            <Label className="text-muted-foreground">Senha</Label>
             <div className="relative">
               <Input
                 type={show ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="bg-slate-700 border-slate-600 text-white mt-1 pr-10"
+                className="bg-input border-input text-foreground mt-1 pr-10"
               />
               <button
                 type="button"
                 onClick={() => setShow((v) => !v)}
-                className="absolute right-2 top-2.5 text-slate-300"
+                className="absolute right-2 top-2.5 text-muted-foreground"
               >
                 {show ? (
                   <EyeOff className="h-5 w-5" />
@@ -113,13 +113,13 @@ export default function LoginPage() {
           <Button
             onClick={submit}
             disabled={loading}
-            className="bg-blue-600 hover:bg-blue-700"
+            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
           >
             {loading ? "Carregando..." : "Entrar"}
           </Button>
-          <div className="mt-4 text-sm text-slate-400">
+          <div className="mt-4 text-sm text-muted-foreground text-center">
             <span>Não tem uma conta? </span>
-            <a href="/register" className="text-blue-400 hover:underline">
+            <a href="/register" className="text-primary hover:underline">
               Registrar-se
             </a>
           </div>

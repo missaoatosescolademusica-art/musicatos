@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import { Menu } from "lucide-react";
 import AvatarMenu from "./AvatarMenu";
 
@@ -18,19 +18,22 @@ function Topbar({
   breadcrumb,
 }: Props) {
   return (
-    <header className="sticky top-0 z-40 bg-slate-900/80 backdrop-blur border-b border-slate-800">
+    <header className="sticky top-0 z-40 bg-white dark:bg-background/80 backdrop-blur border-b border-border">
       <div className="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <button
             aria-label="Abrir menu"
             aria-controls="app-sidebar"
             aria-expanded={sidebarOpen}
-            className="p-2 rounded hover:bg-slate-800 transition"
+            className="p-2 rounded hover:bg-accent transition"
             onClick={onToggleSidebar}
           >
-            <Menu className="h-5 w-5 text-slate-300" />
+            <Menu className="h-5 w-5 text-muted-foreground" />
           </button>
-          <nav aria-label="Breadcrumb" className="text-slate-400 text-sm">
+          <nav
+            aria-label="Breadcrumb"
+            className="text-muted-foreground text-sm"
+          >
             {breadcrumb}
           </nav>
         </div>

@@ -1,6 +1,6 @@
-"use client"
-import Link from "next/link"
-import Image from "next/image"
+"use client";
+import Link from "next/link";
+import Image from "next/image";
 import { Hammer, Home, UserCog, UserPlus } from "lucide-react";
 
 type Props = {
@@ -33,9 +33,9 @@ function Sidebar({
       }}
       className={`fixed md:fixed left-0 top-14 md:top-14 h-[calc(100vh-3.5rem)] md:h-[calc(100vh-3.5rem)] w-64 transform transition-transform duration-300 ease-out ${
         sidebarOpen ? "translate-x-0" : "-translate-x-full"
-      } bg-slate-800 border-r border-slate-700 z-40`}
+      } bg-sidebar border-r border-sidebar-border z-40`}
     >
-      <div className="p-4 border-b border-slate-700 flex items-center gap-2">
+      <div className="p-4 border-b border-sidebar-border flex items-center gap-2">
         <Image
           src="/Logo.jpg"
           alt="Logo"
@@ -43,13 +43,17 @@ function Sidebar({
           height={36}
           className="rounded"
         />
-        <span className="text-slate-200 font-semibold">Missão Atos</span>
+        <span className="text-sidebar-foreground font-semibold">
+          Missão Atos
+        </span>
       </div>
       <nav className="p-2 space-y-1">
         <Link
           href="/"
-          className={`flex items-center gap-2 px-3 py-2 rounded hover:bg-slate-700 transition ${
-            pathname === "/" ? "bg-slate-700 text-white" : "text-slate-300"
+          className={`flex items-center gap-2 px-3 py-2 rounded hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition ${
+            pathname === "/"
+              ? "bg-sidebar-accent text-sidebar-accent-foreground"
+              : "text-sidebar-foreground/80"
           }`}
           onClick={onCloseSidebar}
           aria-current={pathname === "/" ? "page" : undefined}
@@ -59,10 +63,10 @@ function Sidebar({
         </Link>
         <Link
           href="/resources"
-          className={`flex items-center gap-2 px-3 py-2 rounded hover:bg-slate-700 transition ${
+          className={`flex items-center gap-2 px-3 py-2 rounded hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition ${
             pathname === "/resources"
-              ? "bg-slate-700 text-white"
-              : "text-slate-300"
+              ? "bg-sidebar-accent text-sidebar-accent-foreground"
+              : "text-sidebar-foreground/80"
           }`}
           onClick={onCloseSidebar}
           aria-current={pathname === "/resources" ? "page" : undefined}
@@ -73,10 +77,10 @@ function Sidebar({
         {role === "admin" && (
           <Link
             href="/register"
-            className={`flex items-center gap-2 px-3 py-2 rounded hover:bg-slate-700 transition ${
+            className={`flex items-center gap-2 px-3 py-2 rounded hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition ${
               pathname === "/register"
-                ? "bg-slate-700 text-white"
-                : "text-slate-300"
+                ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                : "text-sidebar-foreground/80"
             }`}
             onClick={onCloseSidebar}
             aria-current={pathname === "/register" ? "page" : undefined}
@@ -88,10 +92,10 @@ function Sidebar({
         {role === "admin" && (
           <Link
             href="/admin/users"
-            className={`flex items-center gap-2 px-3 py-2 rounded hover:bg-slate-700 transition ${
+            className={`flex items-center gap-2 px-3 py-2 rounded hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition ${
               pathname === "/admin/users"
-                ? "bg-slate-700 text-white"
-                : "text-slate-300"
+                ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                : "text-sidebar-foreground/80"
             }`}
             onClick={onCloseSidebar}
             aria-current={pathname === "/admin/users" ? "page" : undefined}
@@ -103,10 +107,10 @@ function Sidebar({
         {role === "admin" && (
           <Link
             href="/admin/sessions"
-            className={`flex items-center gap-2 px-3 py-2 rounded hover:bg-slate-700 transition ${
+            className={`flex items-center gap-2 px-3 py-2 rounded hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition ${
               pathname === "/admin/sessions"
-                ? "bg-slate-700 text-white"
-                : "text-slate-300"
+                ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                : "text-sidebar-foreground/80"
             }`}
             onClick={onCloseSidebar}
             aria-current={pathname === "/admin/sessions" ? "page" : undefined}
@@ -117,10 +121,10 @@ function Sidebar({
         )}
         <Link
           href="/attendance"
-          className={`flex items-center gap-2 px-3 py-2 rounded hover:bg-slate-700 transition ${
+          className={`flex items-center gap-2 px-3 py-2 rounded hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition ${
             pathname === "/attendance"
-              ? "bg-slate-700 text-white"
-              : "text-slate-300"
+              ? "bg-sidebar-accent text-sidebar-accent-foreground"
+              : "text-sidebar-foreground/80"
           }`}
           onClick={onCloseSidebar}
           aria-current={pathname === "/attendance" ? "page" : undefined}
@@ -128,13 +132,13 @@ function Sidebar({
           <Home className="h-4 w-4" />
           <span>Lista de Chamada</span>
         </Link>
-        {role !== "professor" && (
+        {role == "professor" && (
           <Link
             href="/dashboard"
-            className={`flex items-center gap-2 px-3 py-2 rounded hover:bg-slate-700 transition ${
+            className={`flex items-center gap-2 px-3 py-2 rounded hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition ${
               pathname === "/dashboard"
-                ? "bg-slate-700 text-white"
-                : "text-slate-300"
+                ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                : "text-sidebar-foreground/80"
             }`}
             onClick={onCloseSidebar}
             aria-current={pathname === "/dashboard" ? "page" : undefined}
@@ -148,4 +152,4 @@ function Sidebar({
   );
 }
 
-export default Sidebar
+export default Sidebar;

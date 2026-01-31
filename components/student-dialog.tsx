@@ -105,12 +105,12 @@ export function StudentDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-slate-800 border-slate-700 max-w-2xl">
+      <DialogContent className="bg-popover border-border max-w-2xl">
         <DialogHeader>
-          <DialogTitle className="text-white">
+          <DialogTitle className="text-popover-foreground">
             {mode === "view" ? "Detalhes do Estudante" : "Editar Estudante"}
           </DialogTitle>
-          <DialogDescription className="text-slate-400">
+          <DialogDescription className="text-muted-foreground">
             {mode === "view"
               ? "Visualize as informações do estudante"
               : "Edite as informações do estudante"}
@@ -120,7 +120,7 @@ export function StudentDialog({
         <div className="space-y-4">
           {/* Full Name */}
           <div>
-            <Label className="text-slate-200 text-sm font-medium">
+            <Label className="text-foreground text-sm font-medium">
               Nome Completo
             </Label>
             <Input
@@ -129,13 +129,13 @@ export function StudentDialog({
                 setFormData({ ...formData, fullName: e.target.value })
               }
               disabled={mode === "view"}
-              className="mt-1 bg-slate-700 border-slate-600 text-white disabled:opacity-60"
+              className="mt-1 bg-input border-input text-foreground disabled:opacity-60"
             />
           </div>
 
           {/* Name Father */}
           <div>
-            <Label className="text-slate-200 text-sm font-medium">
+            <Label className="text-foreground text-sm font-medium">
               Nome do Pai
             </Label>
             <Input
@@ -144,13 +144,13 @@ export function StudentDialog({
                 setFormData({ ...formData, nameFather: e.target.value })
               }
               disabled={mode === "view"}
-              className="mt-1 bg-slate-700 border-slate-600 text-white disabled:opacity-60"
+              className="mt-1 bg-input border-input text-foreground disabled:opacity-60"
             />
           </div>
 
           {/* Name Mother */}
           <div>
-            <Label className="text-slate-200 text-sm font-medium">
+            <Label className="text-foreground text-sm font-medium">
               Nome da Mãe
             </Label>
             <Input
@@ -159,27 +159,27 @@ export function StudentDialog({
                 setFormData({ ...formData, nameMother: e.target.value })
               }
               disabled={mode === "view"}
-              className="mt-1 bg-slate-700 border-slate-600 text-white disabled:opacity-60"
+              className="mt-1 bg-input border-input text-foreground disabled:opacity-60"
             />
           </div>
 
           {/* Phone */}
           <div>
-            <Label className="text-slate-200 text-sm font-medium">
+            <Label className="text-foreground text-sm font-medium">
               WhatsApp
             </Label>
             <Input
               value={formData.phone}
               onChange={handlePhoneChange}
               disabled={mode === "view"}
-              className="mt-1 bg-slate-700 border-slate-600 text-white disabled:opacity-60"
+              className="mt-1 bg-input border-input text-foreground disabled:opacity-60"
               maxLength={17}
             />
           </div>
 
           {/* Address */}
           <div>
-            <Label className="text-slate-200 text-sm font-medium">
+            <Label className="text-foreground text-sm font-medium">
               Endereço
             </Label>
             <Input
@@ -188,13 +188,13 @@ export function StudentDialog({
                 setFormData({ ...formData, address: e.target.value })
               }
               disabled={mode === "view"}
-              className="mt-1 bg-slate-700 border-slate-600 text-white disabled:opacity-60"
+              className="mt-1 bg-input border-input text-foreground disabled:opacity-60"
             />
           </div>
 
           {/* Instruments */}
           <div>
-            <Label className="text-slate-200 text-sm font-medium">
+            <Label className="text-foreground text-sm font-medium">
               Instrumentos
             </Label>
             {mode === "view" ? (
@@ -202,7 +202,7 @@ export function StudentDialog({
                 {formData.instruments.map((instrument) => (
                   <span
                     key={instrument}
-                    className="inline-block bg-blue-600 text-white text-sm px-3 py-1 rounded"
+                    className="inline-block bg-primary text-primary-foreground text-sm px-3 py-1 rounded"
                   >
                     {instrument}
                   </span>
@@ -217,7 +217,7 @@ export function StudentDialog({
                     instruments: e.target.value ? [e.target.value] : [],
                   })
                 }
-                className="bg-slate-700 border border-slate-600 text-white mt-1 rounded p-2 w-full"
+                className="bg-input border border-input text-foreground mt-1 rounded p-2 w-full"
               >
                 <option value="">Selecione um instrumento</option>
                 {INSTRUMENTS.map((opt) => (
@@ -237,9 +237,9 @@ export function StudentDialog({
                 setFormData({ ...formData, available: checked as boolean })
               }
               disabled={mode === "view"}
-              className="border-slate-600 bg-slate-700 disabled:opacity-60"
+              className="border-input bg-background disabled:opacity-60"
             />
-            <Label className="text-slate-300 font-normal cursor-pointer">
+            <Label className="text-muted-foreground font-normal cursor-pointer">
               Disponível para aulas
             </Label>
           </div>
@@ -250,7 +250,7 @@ export function StudentDialog({
           <Button
             variant="outline"
             onClick={() => onOpenChange(false)}
-            className="bg-slate-700 border-slate-600 text-slate-200 hover:bg-slate-600"
+            className="border-border hover:bg-muted"
           >
             {mode === "view" ? "Fechar" : "Cancelar"}
           </Button>
@@ -258,7 +258,7 @@ export function StudentDialog({
             <Button
               onClick={handleSave}
               disabled={saving}
-              className="bg-blue-600 hover:bg-blue-700 text-white"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground"
             >
               {saving ? "Salvando..." : "Salvar Alterações"}
             </Button>

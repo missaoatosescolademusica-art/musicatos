@@ -31,9 +31,9 @@ export type SearchBarProps = {
 export default function SearchBar({
   placeholder = "Buscar...",
   debounceMs = 300,
-  containerClassName = "bg-slate-800 border-slate-700 mb-6 p-4",
-  inputClassName = "pl-10 bg-slate-700 border-slate-600 text-white placeholder:text-slate-500",
-  buttonClassName = "bg-blue-600 hover:bg-blue-700 text-white whitespace-nowrap",
+  containerClassName = "bg-card border-border mb-6 p-4",
+  inputClassName = "pl-10 bg-input border-input text-foreground placeholder:text-muted-foreground",
+  buttonClassName = "bg-primary hover:bg-primary/90 text-primary-foreground whitespace-nowrap",
   showUpdateButton = true,
 }: SearchBarProps) {
   const {
@@ -63,7 +63,7 @@ export default function SearchBar({
     <Card className={containerClassName}>
       <div className="flex gap-4 items-center flex-nowrap">
         <div className="flex-1 relative min-w-0">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-500" />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder={placeholder}
             value={value}

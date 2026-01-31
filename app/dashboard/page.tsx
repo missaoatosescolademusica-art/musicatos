@@ -76,13 +76,13 @@ function DashboardContent() {
               className="rounded-full mr-3 mb-10"
             />
             <div className="flex items-center">
-              <Users className="h-8 w-8 text-blue-400 mr-3" />
-              <h1 className="text-3xl font-bold text-slate-900 dark:text-white">
+              <Users className="h-8 w-8 text-primary mr-3" />
+              <h1 className="text-3xl font-bold text-foreground">
                 {isProfessor ? "Painel do Professor" : "Painel Administrativo"}
               </h1>
             </div>
           </div>
-          <p className="text-slate-800 dark:text-slate-400 text-center">
+          <p className="text-muted-foreground text-center">
             Gerencie todos os alunos registrados
           </p>
         </div>
@@ -96,22 +96,22 @@ function DashboardContent() {
         <SearchBar placeholder="Buscar por ID do estudante..." />
 
         {isProfessor && (
-          <div className="bg-slate-800 border border-slate-700 rounded p-4 grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+          <div className="bg-card border border-border rounded p-4 grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
             <div>
-              <Label className="text-slate-300">Instrumento</Label>
+              <Label className="text-muted-foreground">Instrumento</Label>
               <Input
                 value={instrumentFilter}
                 onChange={(e) => setInstrumentFilter(e.target.value)}
-                className="bg-slate-700 border-slate-600 text-white mt-1"
+                className="bg-input border-input text-foreground mt-1"
                 placeholder="Ex.: Violão"
               />
             </div>
             <div>
-              <Label className="text-slate-300">Disponibilidade</Label>
+              <Label className="text-muted-foreground">Disponibilidade</Label>
               <select
                 value={availableFilter}
                 onChange={(e) => setAvailableFilter(e.target.value)}
-                className="bg-slate-700 border border-slate-600 text-white mt-1 rounded p-2 w-full"
+                className="bg-input border border-input text-foreground mt-1 rounded p-2 w-full"
               >
                 <option value="">Todos</option>
                 <option value="true">Disponível</option>
@@ -143,56 +143,56 @@ function DashboardContent() {
           totalPages={totalPages}
           pageSize={itemsPerPage}
           onPageChange={(p) => setCurrentPage(p)}
-          containerClassName="bg-slate-800 border-slate-700 overflow-hidden shadow-xl"
-          headerRowClassName="bg-slate-700"
-          bodyRowClassName="border-slate-700 hover:bg-slate-700 transition"
+          containerClassName="bg-card border-border overflow-hidden shadow-xl"
+          headerRowClassName="bg-muted/50"
+          bodyRowClassName="border-border hover:bg-muted/50 transition"
           columns={[
             {
               header: "ID",
               headerClassName:
-                "text-slate-900 dark:text-slate-300 font-semibold",
-              cellClassName: "text-slate-300 font-mono text-sm",
+                "text-muted-foreground font-semibold",
+              cellClassName: "text-muted-foreground font-mono text-sm",
               render: (s: Student) => `${s.id.slice(0, 8)}...`,
             },
             {
               header: "Nome",
               headerClassName:
-                "text-slate-900 dark:text-slate-300 font-semibold",
-              cellClassName: "text-white font-medium",
+                "text-muted-foreground font-semibold",
+              cellClassName: "text-foreground font-medium",
               render: (s: Student) => s.fullName,
             },
             {
               header: "Pai",
               headerClassName:
-                "text-slate-900 dark:text-slate-300 font-semibold",
-              cellClassName: "text-slate-300",
+                "text-muted-foreground font-semibold",
+              cellClassName: "text-muted-foreground",
               render: (s: Student) => s.nameFather,
             },
             {
               header: "Mãe",
               headerClassName:
-                "text-slate-900 dark:text-slate-300 font-semibold",
-              cellClassName: "text-slate-300",
+                "text-muted-foreground font-semibold",
+              cellClassName: "text-muted-foreground",
               render: (s: Student) => s.nameMother,
             },
             {
               header: "WhatsApp",
               headerClassName:
-                "text-slate-900 dark:text-slate-300 font-semibold",
-              cellClassName: "text-slate-300",
+                "text-muted-foreground font-semibold",
+              cellClassName: "text-muted-foreground",
               render: (s: Student) => s.phone,
             },
             {
               header: "Instrumentos",
               headerClassName:
-                "text-slate-900 dark:text-slate-300 font-semibold",
+                "text-muted-foreground font-semibold",
               render: (s: Student) => (
                 <div className="flex gap-1 flex-wrap">
                   {s.instruments.map((instrument) => (
                     <Badge
                       key={instrument}
                       variant="secondary"
-                      className="bg-blue-600 text-white"
+                      className="bg-primary text-primary-foreground hover:bg-primary/90"
                     >
                       {instrument}
                     </Badge>

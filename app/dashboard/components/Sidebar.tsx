@@ -132,7 +132,7 @@ function Sidebar({
           <Home className="h-4 w-4" />
           <span>Lista de Chamada</span>
         </Link>
-        {role == "professor" && (
+        {(role === "professor" || role === "admin") && (
           <Link
             href="/dashboard"
             className={`flex items-center gap-2 px-3 py-2 rounded hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition ${

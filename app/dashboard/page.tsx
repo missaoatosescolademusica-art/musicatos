@@ -34,6 +34,12 @@ function DashboardContent() {
     loading,
     searchQuery,
     setSearchQuery: _setSearchQuery,
+    phoneFilter,
+    setPhoneFilter,
+    instrumentFilter,
+    setInstrumentFilter,
+    availableFilter,
+    setAvailableFilter,
     currentPage,
     setCurrentPage,
     totalPages,
@@ -51,14 +57,36 @@ function DashboardContent() {
 
   const itemsPerPage = 10;
 
+  const [instrumentOptions, setInstrumentOptions] = React.useState<string[]>(
+    [],
+  );
+
   useEffect(() => {
     fetchStudents();
-  }, [currentPage, searchQuery]);
+  }, [
+    currentPage,
+    searchQuery,
+    phoneFilter,
+    instrumentFilter,
+    availableFilter,
+  ]);
 
   const isAdmin = me?.role === "admin";
   const isProfessor = me?.role === "professor";
-  const [instrumentFilter, setInstrumentFilter] = React.useState("");
-  const [availableFilter, setAvailableFilter] = React.useState("");
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [phoneFilter, instrumentFilter, availableFilter, setCurrentPage]);
+
+  useEffect(() => {
+    fetch("/api/students?mode=instruments")
+      .then((r) => r.json())
+      .then((json) => {
+        const list = Array.isArray(json.instruments) ? json.instruments : [];
+        setInstrumentOptions(list);
+      })
+      .catch(() => {});
+  }, []);
 
   return (
     <main
@@ -95,16 +123,31 @@ function DashboardContent() {
 
         <SearchBar placeholder="Buscar por ID do estudante..." />
 
-        {isProfessor && (
+        {(isProfessor || isAdmin) && (
           <div className="bg-card border border-border rounded p-4 grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
             <div>
-              <Label className="text-muted-foreground">Instrumento</Label>
+              <Label className="text-muted-foreground">Telefone</Label>
               <Input
+                value={phoneFilter}
+                onChange={(e) => setPhoneFilter(e.target.value)}
+                className="bg-input border-input text-foreground mt-1"
+                placeholder="Ex.: 11 99999-9999"
+              />
+            </div>
+            <div>
+              <Label className="text-muted-foreground">Instrumento</Label>
+              <select
                 value={instrumentFilter}
                 onChange={(e) => setInstrumentFilter(e.target.value)}
-                className="bg-input border-input text-foreground mt-1"
-                placeholder="Ex.: Violão"
-              />
+                className="bg-input border border-input text-foreground mt-1 rounded p-2 w-full"
+              >
+                <option value="">Todos</option>
+                {instrumentOptions.map((instrument) => (
+                  <option key={instrument} value={instrument}>
+                    {instrument}
+                  </option>
+                ))}
+              </select>
             </div>
             <div>
               <Label className="text-muted-foreground">Disponibilidade</Label>
@@ -121,23 +164,7 @@ function DashboardContent() {
           </div>
         )}
         <DataTable
-          data={
-            isProfessor
-              ? students.filter((s) => {
-                  const iok = instrumentFilter
-                    ? s.instruments.some((i) =>
-                        i
-                          .toLowerCase()
-                          .includes(instrumentFilter.toLowerCase()),
-                      )
-                    : true;
-                  const aok = availableFilter
-                    ? String(s.available) === availableFilter
-                    : true;
-                  return iok && aok;
-                })
-              : students
-          }
+          data={students}
           loading={loading}
           currentPage={currentPage}
           totalPages={totalPages}
@@ -149,43 +176,37 @@ function DashboardContent() {
           columns={[
             {
               header: "ID",
-              headerClassName:
-                "text-muted-foreground font-semibold",
+              headerClassName: "text-muted-foreground font-semibold",
               cellClassName: "text-muted-foreground font-mono text-sm",
               render: (s: Student) => `${s.id.slice(0, 8)}...`,
             },
             {
               header: "Nome",
-              headerClassName:
-                "text-muted-foreground font-semibold",
+              headerClassName: "text-muted-foreground font-semibold",
               cellClassName: "text-foreground font-medium",
               render: (s: Student) => s.fullName,
             },
             {
               header: "Pai",
-              headerClassName:
-                "text-muted-foreground font-semibold",
+              headerClassName: "text-muted-foreground font-semibold",
               cellClassName: "text-muted-foreground",
               render: (s: Student) => s.nameFather,
             },
             {
               header: "Mãe",
-              headerClassName:
-                "text-muted-foreground font-semibold",
+              headerClassName: "text-muted-foreground font-semibold",
               cellClassName: "text-muted-foreground",
               render: (s: Student) => s.nameMother,
             },
             {
               header: "WhatsApp",
-              headerClassName:
-                "text-muted-foreground font-semibold",
+              headerClassName: "text-muted-foreground font-semibold",
               cellClassName: "text-muted-foreground",
               render: (s: Student) => s.phone,
             },
             {
               header: "Instrumentos",
-              headerClassName:
-                "text-muted-foreground font-semibold",
+              headerClassName: "text-muted-foreground font-semibold",
               render: (s: Student) => (
                 <div className="flex gap-1 flex-wrap">
                   {s.instruments.map((instrument) => (

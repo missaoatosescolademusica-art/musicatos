@@ -9,6 +9,12 @@ export type StudentsContextState = {
   setError: (v: string | null) => void
   searchQuery: string
   setSearchQuery: (v: string) => void
+  phoneFilter: string
+  setPhoneFilter: (v: string) => void
+  instrumentFilter: string
+  setInstrumentFilter: (v: string) => void
+  availableFilter: string
+  setAvailableFilter: (v: string) => void
   currentPage: number
   setCurrentPage: (v: number) => void
   totalPages: number

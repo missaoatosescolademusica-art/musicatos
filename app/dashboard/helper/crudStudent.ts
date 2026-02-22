@@ -10,6 +10,9 @@ import {
 export const fetchStudents = ({
   currentPage,
   searchQuery,
+  phoneFilter,
+  instrumentFilter,
+  availableFilter,
   setLoading,
   setStudents,
   setTotalPages,
@@ -17,6 +20,9 @@ export const fetchStudents = ({
     fetchStudentsHandle({
       currentPage,
       searchQuery,
+      phoneFilter,
+      instrumentFilter,
+      availableFilter,
       setLoading,
       setStudents,
       setTotalPages,

@@ -9,27 +9,65 @@ export async function GET(request: NextRequest) {
     if (!auth)
       return NextResponse.json({ message: "Não autenticado" }, { status: 401 });
     const searchParams = request.nextUrl.searchParams;
+    const mode = searchParams.get("mode") || "";
+
+    if (mode === "instruments") {
+      const rows = await prisma.student.findMany({
+        select: { instruments: true },
+      });
+      const set = new Set<string>();
+      for (const row of rows) {
+        for (const inst of row.instruments || []) {
+          if (inst) set.add(inst);
+        }
+      }
+      return NextResponse.json({
+        instruments: Array.from(set).sort(),
+      });
+    }
+
     const page = Number.parseInt(searchParams.get("page") || "1");
     const search = searchParams.get("search") || "";
+    const phone = searchParams.get("phone") || "";
+    const instrument = searchParams.get("instrument") || "";
+    const availableParam = searchParams.get("available");
+    const available =
+      availableParam === "true"
+        ? true
+        : availableParam === "false"
+          ? false
+          : undefined;
     const itemsPerPage = 10;
 
     const skip = (page - 1) * itemsPerPage;
 
-    const where: Prisma.StudentWhereInput = search
-      ? {
-          OR: [
-            {
-              id: { contains: search, mode: "insensitive" as Prisma.QueryMode },
-            },
-            {
-              fullName: {
-                contains: search,
-                mode: "insensitive" as Prisma.QueryMode,
-              },
-            },
-          ],
-        }
-      : {};
+    const where: Prisma.StudentWhereInput = {};
+
+    if (search) {
+      where.OR = [
+        {
+          id: { contains: search, mode: "insensitive" as Prisma.QueryMode },
+        },
+        {
+          fullName: {
+            contains: search,
+            mode: "insensitive" as Prisma.QueryMode,
+          },
+        },
+      ];
+    }
+
+    if (phone) {
+      where.phone = { contains: phone, mode: "insensitive" as Prisma.QueryMode };
+    }
+
+    if (instrument) {
+      where.instruments = { has: instrument };
+    }
+
+    if (typeof available === "boolean") {
+      where.available = available;
+    }
 
     const [students, total] = await Promise.all([
       prisma.student.findMany({

@@ -14,6 +14,9 @@ export interface Student {
 export type FetchStudentsDeps = {
   currentPage: number;
   searchQuery: string;
+  phoneFilter: string;
+  instrumentFilter: string;
+  availableFilter: string;
   setLoading: (v: boolean) => void;
   setStudents: (arr: Student[]) => void;
   setTotalPages: (n: number) => void;

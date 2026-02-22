@@ -4,12 +4,26 @@ import { toast } from "sonner"
 
 
 export async function fetchStudents(deps: FetchStudentsDeps) {
-  const { currentPage, searchQuery, setLoading, setStudents, setTotalPages } = deps
+  const {
+    currentPage,
+    searchQuery,
+    phoneFilter,
+    instrumentFilter,
+    availableFilter,
+    setLoading,
+    setStudents,
+    setTotalPages,
+  } = deps
   setLoading(true)
   try {
-    const response = await fetch(
-      `/api/students?page=${currentPage}&search=${encodeURIComponent(searchQuery)}`
-    )
+    const params = new URLSearchParams()
+    params.set("page", String(currentPage))
+    if (searchQuery) params.set("search", searchQuery)
+    if (phoneFilter) params.set("phone", phoneFilter)
+    if (instrumentFilter) params.set("instrument", instrumentFilter)
+    if (availableFilter) params.set("available", availableFilter)
+
+    const response = await fetch(`/api/students?${params.toString()}`)
     if (!response.ok) throw new Error("Failed to fetch students")
 
     const data = await response.json()

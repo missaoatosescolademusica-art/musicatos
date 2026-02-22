@@ -19,6 +19,9 @@ export function StudentsProvider({ children }: { children: React.ReactNode }) {
   const [students, setStudents] = useState<Student[]>([])
   const [loading, setLoading] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
+  const [phoneFilter, setPhoneFilter] = useState("")
+  const [instrumentFilter, setInstrumentFilter] = useState("")
+  const [availableFilter, setAvailableFilter] = useState("")
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null)
@@ -31,17 +34,23 @@ export function StudentsProvider({ children }: { children: React.ReactNode }) {
     fetchStudentsWrapper({
       currentPage,
       searchQuery,
+      phoneFilter,
+      instrumentFilter,
+      availableFilter,
       setLoading,
       setStudents,
       setTotalPages,
     })
-  }, [currentPage, searchQuery])
+  }, [currentPage, searchQuery, phoneFilter, instrumentFilter, availableFilter])
 
   const fetchStudents = () => {
     setError(null)
     return fetchStudentsWrapper({
       currentPage,
       searchQuery,
+      phoneFilter,
+      instrumentFilter,
+      availableFilter,
       setLoading,
       setStudents,
       setTotalPages,
@@ -70,6 +79,12 @@ export function StudentsProvider({ children }: { children: React.ReactNode }) {
       setError,
       searchQuery,
       setSearchQuery,
+      phoneFilter,
+      setPhoneFilter,
+      instrumentFilter,
+      setInstrumentFilter,
+      availableFilter,
+      setAvailableFilter,
       currentPage,
       setCurrentPage,
       totalPages,
@@ -90,6 +105,9 @@ export function StudentsProvider({ children }: { children: React.ReactNode }) {
       students,
       loading,
       searchQuery,
+      phoneFilter,
+      instrumentFilter,
+      availableFilter,
       currentPage,
       totalPages,
       selectedStudent,
